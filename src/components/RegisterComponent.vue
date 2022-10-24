@@ -7,15 +7,20 @@
     <input type="password" class="form-control" id="passwordInputRegister" placeholder="Password">
     <input type="password" class="form-control" id="confirmpass" placeholder="Confirm Password">
     <button type="button" class="register-button" v-on:click="registerUser()">Register</button>
+    <div v-if="cognitoUser != null">
+      <confirmation-registration-component :username="username" :cognitoUser="cognitoUser"/>
+    </div>
   </div>
 </template>
 
 <script>
 import * as AmazonCognitoIdentity from 'amazon-cognito-identity-js';
+import ConfirmationRegistrationComponent from '@/components/ConfirmRegistrationComponent.vue';
 import config from '../../config/config';
 
 export default {
   name: 'RegisterComponent',
+  components: { ConfirmationRegistrationComponent },
   data() {
     return {
       username: null,

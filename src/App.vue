@@ -5,14 +5,12 @@
 </template>
 
 <script>
-// import ConfirmationRegistrationComponent from '@/components/ConfirmRegistrationComponent.vue';
 import RegisterComponent from './components/RegisterComponent.vue';
 
 export default {
   name: 'App',
   components: {
     RegisterComponent,
-    // ConfirmationRegistrationComponent,
   },
 };
 </script>
