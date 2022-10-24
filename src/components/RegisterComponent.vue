@@ -20,9 +20,11 @@ export default {
     return {
       username: null,
       password: null,
+      passwordConfirmation: null,
       personalName: null,
       poolData: null,
       cognitoUser: null,
+      attributeList: [],
     };
   },
 
@@ -58,24 +60,23 @@ export default {
       console.log('inside registeruser()');
 
       this.personalName = document.getElementById('personalnameRegister').value;
+      this.password = document.getElementById('passwordInputRegister').value;
+      this.passwordConfirmation = document.getElementById('confirmpass').value;
       this.username = document.getElementById('emailInputRegister').value;
 
-      if (document.getElementById('passwordInputRegister').value !== document.getElementById('confirmpass').value) {
+      if (this.password !== this.passwordConfirmation) {
         // eslint-disable-next-line no-console
         console.log('Passwords do not match!');
         throw new Error('Passwords do not match');
-      } else {
-        this.password = document.getElementById('passwordInputRegister').value;
       }
+
       this.poolData = {
         UserPoolId: config.cognito.userPoolId,
         ClientId: config.cognito.clientId,
       };
-      // eslint-disable-next-line no-unused-vars
+
       const userPool = new AmazonCognitoIdentity.CognitoUserPool(this.poolData);
-      // eslint-disable-next-line no-unused-vars
-      const attributeList = [];
-      // eslint-disable-next-line no-unused-vars
+
       const dataEmail = {
         Name: 'email',
         Value: this.username,
@@ -86,13 +87,14 @@ export default {
         Value: this.personalName,
       };
       const attributeEmail = new AmazonCognitoIdentity.CognitoUserAttribute(dataEmail);
+
       // eslint-disable-next-line max-len
       const attributePersonalName = new AmazonCognitoIdentity.CognitoUserAttribute(dataPersonalName);
-      attributeList.push(attributeEmail);
-      attributeList.push(attributePersonalName);
+      this.attributeList.push(attributeEmail);
+      this.attributeList.push(attributePersonalName);
 
       // sign user up through user pool
-      userPool.signUp(this.username, this.password, attributeList, null, (error, result) => {
+      userPool.signUp(this.username, this.password, this.attributeList, null, (error, result) => {
         if (error) {
           // eslint-disable-next-line no-console
           console.log(error.message || JSON.stringify(error));
