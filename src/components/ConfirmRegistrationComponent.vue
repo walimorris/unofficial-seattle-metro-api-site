@@ -1,13 +1,13 @@
 <template>
-<div id="confirm-registration">
+<div v-if="!this.verified" id="confirm-registration">
   <input type="password" class="form-control" id="verificationCode" placeholder="Enter Code">
   <button type="button" class="verify-button" v-on:click="verifyUser()">Verify</button>
 </div>
 </template>
 
 <script>
-import { CognitoUser } from 'amazon-cognito-identity-js';
 import * as AmazonCognitoIdentity from 'amazon-cognito-identity-js';
+import { CognitoUser } from 'amazon-cognito-identity-js';
 import config from '../../config/config';
 
 export default {

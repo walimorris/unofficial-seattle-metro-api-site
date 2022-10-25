@@ -1,14 +1,20 @@
 <template>
   <div class="register-component">
-    <h1 class="register-component-title" id="title-header">Register an Account</h1>
-
-    <input type="text" class="form-control" id="personalnameRegister" placeholder="Name">
-    <input type="email" class="form-control" id="emailInputRegister" placeholder="Email">
-    <input type="password" class="form-control" id="passwordInputRegister" placeholder="Password">
-    <input type="password" class="form-control" id="confirmpass" placeholder="Confirm Password">
-    <button type="button" class="register-button" v-on:click="registerUser()">Register</button>
-    <div v-if="cognitoUser != null">
+    <h1 v-if="!basicRegisteredCookieSet" class="register-component-title"
+        id="title-header">Register an Account
+    </h1>
+    <form v-if="!basicRegisteredCookieSet">
+      <input type="text" class="form-control" id="personalnameRegister" placeholder="Name">
+      <input type="email" class="form-control" id="emailInputRegister" placeholder="Email">
+      <input type="password" class="form-control" id="passwordInputRegister" placeholder="Password">
+      <input type="password" class="form-control" id="confirmpass" placeholder="Confirm Password">
+      <button type="button" class="register-button" v-on:click="registerUser()">Register</button>
+    </form>
+    <div v-if="cognitoUser !== null">
       <confirmation-registration-component :username="username" :cognitoUser="cognitoUser"/>
+    </div>
+    <div v-if="basicRegisteredCookieSet" class="sign-in-component">
+      <sign-in-component :basicRegisteredCookieSet="basicRegisteredCookieSet"/>
     </div>
   </div>
 </template>
@@ -16,11 +22,13 @@
 <script>
 import * as AmazonCognitoIdentity from 'amazon-cognito-identity-js';
 import ConfirmationRegistrationComponent from '@/components/ConfirmRegistrationComponent.vue';
+import SignInComponent from '@/components/SignInComponent.vue';
+import Cookies from 'js-cookie';
 import config from '../../config/config';
 
 export default {
   name: 'RegisterComponent',
-  components: { ConfirmationRegistrationComponent },
+  components: { ConfirmationRegistrationComponent, SignInComponent },
   data() {
     return {
       username: null,
@@ -30,6 +38,8 @@ export default {
       poolData: null,
       cognitoUser: null,
       attributeList: [],
+      basicRegisteredCookieSet: false,
+      basicRegisteredCookie: null,
     };
   },
 
@@ -47,6 +57,10 @@ export default {
   created() {
     // eslint-disable-next-line no-console
     console.log('Document created!');
+    this.basicRegisteredCookie = this.getBasicRegisteredCookieIfExists();
+    if (this.basicRegisteredCookie !== null) {
+      this.basicRegisteredCookieSet = true;
+    }
   },
 
   methods: {
@@ -108,7 +122,51 @@ export default {
         // eslint-disable-next-line no-console
         console.log(`user name: ${this.cognitoUser.username}`);
         document.getElementById('title-header').innerHTML = 'Check your email for verification';
+        this.setBasicRegisteredCookie();
       });
+    },
+
+    /**
+     * Sets a basic registered cookie that determines if a user is returning and has completed
+     * registration.
+     */
+    setBasicRegisteredCookie() {
+      if (this.verified === true) {
+        const value = this.generateRandomId(15);
+        const basicRegisteredCookieName = '_Secure-BasicRegisteredCookie';
+        Cookies.set(basicRegisteredCookieName, value, { expires: 7, sameSite: 'strict' });
+        if (Cookies.get(basicRegisteredCookieName) !== null) {
+          // eslint-disable-next-line no-console
+          console.log(`cookie set: ${basicRegisteredCookieName}`);
+          this.basicRegisteredCookieSet = true;
+        }
+      }
+    },
+
+    /**
+     * Gets the secure basic registered cookie if it exists.
+     *
+     * @see Cookies
+     * @returns {String}
+     */
+    getBasicRegisteredCookieIfExists() {
+      return Cookies.get('_Secure-BasicRegisteredCookie');
+    },
+
+    /**
+     * Generates a random id.
+     *
+     * @param length the generated id length
+     * @returns {string}
+     */
+    generateRandomId(length) {
+      let result = '';
+      const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+      const charactersLength = characters.length;
+      for (let i = 0; i < length; i += 1) {
+        result += characters.charAt(Math.floor(Math.random() * charactersLength));
+      }
+      return result;
     },
   },
 };
