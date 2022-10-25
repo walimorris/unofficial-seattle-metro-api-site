@@ -3,7 +3,7 @@
     <h1 v-if="!basicRegisteredCookieSet" class="register-component-title"
         id="title-header">Register an Account
     </h1>
-    <form v-if="!basicRegisteredCookieSet">
+    <form v-if="!basicRegisteredCookieSet" id="registration-form">
       <input type="text" class="form-control" id="personalnameRegister" placeholder="Name">
       <input type="email" class="form-control" id="emailInputRegister" placeholder="Email">
       <input type="password" class="form-control" id="passwordInputRegister" placeholder="Password">
@@ -13,8 +13,11 @@
     <div v-if="cognitoUser !== null">
       <confirmation-registration-component :username="username" :cognitoUser="cognitoUser"/>
     </div>
-    <div v-if="basicRegisteredCookieSet" class="sign-in-component">
-      <sign-in-component :basicRegisteredCookieSet="basicRegisteredCookieSet"/>
+    <div v-if="basicRegisteredCookieSet && basicVerifiedCookieSet"
+         class="sign-in-component">
+      <sign-in-component :basicRegisteredCookieSet="basicRegisteredCookieSet"
+                         :cognitoUser="cognitoUser"
+                         :basicRegisteredCookie="basicRegisteredCookie"/>
     </div>
   </div>
 </template>
@@ -36,10 +39,13 @@ export default {
       passwordConfirmation: null,
       personalName: null,
       poolData: null,
+      registered: false,
       cognitoUser: null,
       attributeList: [],
       basicRegisteredCookieSet: false,
+      basicVerifiedCookieSet: false,
       basicRegisteredCookie: null,
+      basicVerifiedCookie: null,
     };
   },
 
@@ -55,11 +61,13 @@ export default {
   },
 
   created() {
-    // eslint-disable-next-line no-console
-    console.log('Document created!');
     this.basicRegisteredCookie = this.getBasicRegisteredCookieIfExists();
-    if (this.basicRegisteredCookie !== null) {
+    this.basicVerifiedCookie = this.getBasicVerifiedCookieIfExists();
+    if (this.basicRegisteredCookie !== null && this.basicRegisteredCookie !== undefined) {
       this.basicRegisteredCookieSet = true;
+    }
+    if (this.basicVerifiedCookie !== null && this.basicVerifiedCookie !== undefined) {
+      this.basicVerifiedCookieSet = true;
     }
   },
 
@@ -122,6 +130,7 @@ export default {
         // eslint-disable-next-line no-console
         console.log(`user name: ${this.cognitoUser.username}`);
         document.getElementById('title-header').innerHTML = 'Check your email for verification';
+        this.registered = true;
         this.setBasicRegisteredCookie();
       });
     },
@@ -131,11 +140,11 @@ export default {
      * registration.
      */
     setBasicRegisteredCookie() {
-      if (this.verified === true) {
+      if (this.registered === true) {
         const value = this.generateRandomId(15);
         const basicRegisteredCookieName = '_Secure-BasicRegisteredCookie';
         Cookies.set(basicRegisteredCookieName, value, { expires: 7, sameSite: 'strict' });
-        if (Cookies.get(basicRegisteredCookieName) !== null) {
+        if (Cookies.get(basicRegisteredCookieName) !== undefined) {
           // eslint-disable-next-line no-console
           console.log(`cookie set: ${basicRegisteredCookieName}`);
           this.basicRegisteredCookieSet = true;
@@ -151,6 +160,16 @@ export default {
      */
     getBasicRegisteredCookieIfExists() {
       return Cookies.get('_Secure-BasicRegisteredCookie');
+    },
+
+    /**
+     * Gets the secure basic verified cookie if it exists.
+     *
+     * @see Cookies
+     * @returns {String}
+     */
+    getBasicVerifiedCookieIfExists() {
+      return Cookies.get('_Secure-BasicVerifiedCookie');
     },
 
     /**
