@@ -13,10 +13,8 @@
     <div v-if="cognitoUser !== null">
       <confirmation-registration-component :username="username" :cognitoUser="cognitoUser"/>
     </div>
-    <div v-if="basicRegisteredCookieSet && basicVerifiedCookieSet"
-         class="sign-in-component">
-      <sign-in-component :basicRegisteredCookieSet="basicRegisteredCookieSet"
-                         :cognitoUser="cognitoUser"
+    <div v-if="basicRegisteredCookieSet && basicVerifiedCookieSet" class="sign-in-component">
+      <sign-in-component :basicRegisteredCookieSet="basicRegisteredCookieSet" :cognitoUser="cognitoUser"
                          :basicRegisteredCookie="basicRegisteredCookie"/>
     </div>
   </div>
@@ -83,7 +81,6 @@ export default {
      * @link https://aws.amazon.com/blogs/mobile/accessing-your-user-pools-using-the-amazon-cognito-identity-sdk-for-javascript/
      */
     registerUser() {
-      // eslint-disable-next-line no-console
       console.log('inside registeruser()');
 
       this.personalName = document.getElementById('personalnameRegister').value;
@@ -108,14 +105,12 @@ export default {
         Name: 'email',
         Value: this.username,
       };
-      // eslint-disable-next-line no-unused-vars
       const dataPersonalName = {
         Name: 'name',
         Value: this.personalName,
       };
       const attributeEmail = new AmazonCognitoIdentity.CognitoUserAttribute(dataEmail);
 
-      // eslint-disable-next-line max-len
       const attributePersonalName = new AmazonCognitoIdentity.CognitoUserAttribute(dataPersonalName);
       this.attributeList.push(attributeEmail);
       this.attributeList.push(attributePersonalName);
@@ -123,11 +118,9 @@ export default {
       // sign user up through user pool
       userPool.signUp(this.username, this.password, this.attributeList, null, (error, result) => {
         if (error) {
-          // eslint-disable-next-line no-console
           console.log(error.message || JSON.stringify(error));
         }
         this.cognitoUser = result.user;
-        // eslint-disable-next-line no-console
         console.log(`user name: ${this.cognitoUser.username}`);
         document.getElementById('title-header').innerHTML = 'Check your email for verification';
         this.registered = true;

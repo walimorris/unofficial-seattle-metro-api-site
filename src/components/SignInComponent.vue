@@ -56,8 +56,9 @@ export default {
         ClientId: config.cognito.clientId,
       };
       this.buildCognitoUserClone();
-      // eslint-disable-next-line max-len
-      const authenticationDetails = new CognitoIdentityServiceProvider.AuthenticationDetails(this.authenticationData);
+      const authenticationDetails = new CognitoIdentityServiceProvider
+        .AuthenticationDetails(this.authenticationData);
+
       this.authenticateUser(authenticationDetails);
     },
 
@@ -104,7 +105,6 @@ export default {
             }
           },
           onFailure(error) {
-            // eslint-disable-next-line no-console
             console.log(`Error authenticating user: ${this.username} with ${error}`);
             document.getElementById('authorized-tag').innerHTML = '*Not Authorized*';
           },

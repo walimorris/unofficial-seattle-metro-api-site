@@ -64,7 +64,6 @@ export default {
           this.confirmMetroRegistration(this.cognitoUserClone);
         }
       } else {
-        // eslint-disable-next-line no-console
         console.log('verification-code is null');
       }
     },
