@@ -1,22 +1,25 @@
 <template>
   <div id="app">
-    <RegisterComponent/>
+    <SignInComponent/>
   </div>
 </template>
 
 <script>
-import RegisterComponent from './components/RegisterComponent.vue';
+// import RegisterComponent from './components/RegisterComponent.vue';
+import SignInComponent from './components/SignInComponent.vue';
 
 export default {
   name: 'App',
   components: {
-    RegisterComponent,
+    SignInComponent,
+    // RegisterComponent,
   },
 };
 </script>
 
 <style>
 #app {
+  border: 1px solid red;
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;

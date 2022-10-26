@@ -1,8 +1,9 @@
 <template>
-<div v-if="!this.verified" id="confirm-registration">
+<div v-show="showConfirmationRegistrationForm_" id="confirm-registration">
   <h1 id="verified-header"></h1>
   <input type="password" class="form-control" id="verificationCode" placeholder="Enter Code">
   <button type="button" class="verify-button" v-on:click="verifyUser()">Verify</button>
+  <h3 id="verification-message"></h3>
 </div>
 </template>
 
@@ -17,9 +18,11 @@ export default {
   props: {
     username: { String },
     cognitoUser: { CognitoUser },
+    showConfirmationRegistrationForm: { Boolean }
   },
   data() {
     return {
+      showConfirmationRegistrationForm_: this.showConfirmationRegistrationForm,
       verificationCode: null,
       confirmationResult: null, // possibly needed to re-verify a user
       authenticationDetails: null,
@@ -28,20 +31,14 @@ export default {
       userPool: null,
       userData: null,
       verified: false,
+      verificationRetry: 0,
       cognitoUserClone: null,
     };
   },
   created() {
-    const poolData = {
-      UserPoolId: config.cognito.userPoolId,
-      ClientId: config.cognito.clientId,
-    };
+    const poolData = { UserPoolId: config.cognito.userPoolId, ClientId: config.cognito.clientId, };
     this.userPool = new AmazonCognitoIdentity.CognitoUserPool(poolData);
-
-    const userData = {
-      Username: this.username,
-      Pool: this.userPool,
-    };
+    const userData = { Username: this.username, Pool: this.userPool, };
     this.cognitoUserClone = new AmazonCognitoIdentity.CognitoUser(userData);
     this.basicVerifiedCookie = this.getBasicVerifiedCookieIfExists();
   },
@@ -57,15 +54,26 @@ export default {
      * @see CognitoUser
      */
     verifyUser() {
-      // should add a limit to verification retry
-      this.verificationCode = document.getElementById('verificationCode').value;
-      if (this.verificationCode !== null) {
-        if (this.cognitoUserClone !== null) {
-          this.confirmMetroRegistration(this.cognitoUserClone);
+      if (this.verificationRetry < 3) {
+        this.verificationRetry += 1;
+        this.verificationCode = document.getElementById('verificationCode').value;
+        if (this.verificationCode !== null) {
+          if (this.cognitoUserClone !== null) {
+            this.confirmMetroRegistration(this.cognitoUserClone);
+          }
+        } else {
+          // counts as a retry
+          document.getElementById('verification-message').innerHTML = `fail x${this.verificationRetry}`;
         }
       } else {
-        console.log('verification-code is null');
+        // reached maximum retry, reload to sign in
+        window.location.reload();
       }
+      // verification did not work so remove any text in input for any further retry
+      if (document.getElementById('verificationCode').value !== null) {
+        document.getElementById('verificationCode').value = '';
+      }
+
     },
 
     /**
@@ -74,11 +82,10 @@ export default {
      * @returns {Promise<void>}
      */
     async confirmMetroRegistration(cognitoUser) {
-      document.getElementById('verified-header').innerHTML = 'verifying...';
+      document.getElementById('verified-header').innerHTML = 'Enter Verification Code';
       cognitoUser.confirmRegistration(this.verificationCode, true, (error, result) => {
         if (error) {
-          // eslint-disable-next-line no-console
-          console.log(`Error verifying code: ${this.verificationCode}, verifying..`);
+          document.getElementById('verification-message').innerHTML = `fail x${this.verificationRetry}`;
         } else {
           this.verified = true;
           this.confirmationResult = result;
@@ -102,15 +109,15 @@ export default {
       document.getElementById('verified-header').innerHTML = 'Check email for verification code';
     },
 
+    /**
+     * Sets a basic verification cookie to utilize for further verification actions.
+     */
     setBasicVerifiedCookie() {
       if (this.basicVerifiedCookie === undefined || this.basicVerifiedCookie === null) {
         const value = this.generateRandomId(15);
         const basicVerifiedCookieName = '_Secure-BasicVerifiedCookie';
         Cookies.set(basicVerifiedCookieName, value, { expires: 7, sameSite: 'strict' });
-        // eslint-disable-next-line max-len
         if (Cookies.get(basicVerifiedCookieName) !== undefined || Cookies.get(basicVerifiedCookieName) !== null) {
-          // eslint-disable-next-line no-console
-          console.log(`cookie set: ${basicVerifiedCookieName}`);
           this.basicVerifiedCookieSet = true;
         }
       }
