@@ -4,12 +4,16 @@
     <div v-show="showRegistrationForm">
       <RegisterComponent></RegisterComponent>
     </div>
+    <div v-if="showResendVerificationForm">
+      <ResendVerificationComponent></ResendVerificationComponent>
+    </div>
     <form v-show="showSignInForm" id="sign-in-form">
       <input type="email" class="form-control" id="sign-in-username" placeholder="User Name">
       <input type="password" class="form-control" id="sign-in-password" placeholder="Password">
       <button type="button" class="Sign in" v-on:click="signIn()">Sign In</button>
-      <button type="button" class="Register" v-on:click="loadRegistrationForm()">Register</button>
     </form>
+    <button v-show="showRegisterButton" type="button" class="Register" id="register-button" v-on:click="loadRegistrationForm()">Register</button>
+    <button v-show="showResendVerificationButton" type="button" id="resend-verification-button" v-on:click="loadResendVerificationForm()">Resend Code</button>
     <h3 id="authorized-tag"></h3>
     <h3 id="unauthorized-reason"></h3>
   </div>
@@ -21,11 +25,13 @@ import * as CognitoIdentityServiceProvider from 'amazon-cognito-identity-js';
 import * as AmazonCognitoIdentity from 'amazon-cognito-identity-js';
 import config from '../../config/config';
 import RegisterComponent from '@/components/RegisterComponent.vue';
+import ResendVerificationComponent from '@/components/ResendVerificationComponent.vue';
 import Cookies from 'js-cookie';
 
 export default {
   name: 'SignInComponent',
-  components: { RegisterComponent },
+  // eslint-disable-next-line vue/no-unused-components
+  components: { RegisterComponent, ResendVerificationComponent },
   data() {
     return {
       username: null,
@@ -36,8 +42,11 @@ export default {
       cognitoUser: null,
       userData: null,
       accessToken: null,
-      showRegistrationForm: false,
       showSignInForm: true,
+      showRegistrationForm: false,
+      showRegisterButton: true,
+      showResendVerificationForm: false,
+      showResendVerificationButton: true,
       basicRegisteredCookieSet: null,
       basicRegisteredCookie: null,
       basicVerifiedCookieSet: null,
@@ -135,19 +144,34 @@ export default {
     },
 
     /**
-     * Loads registration form from the sign in view, this action removes any authorization
+     * Loads registration form from the sign in view, this action removes any sign in
      * attributes or text.
      */
     loadRegistrationForm() {
+      this.removeSignInFeatures();
+      this.showRegistrationForm = true;
+    },
+
+    /**
+     * Loads resend validation code form from the sign in view, this action removes any sign in
+     * attributes or text.
+     */
+    loadResendVerificationForm() {
+      this.removeSignInFeatures();
+      this.showResendVerificationForm = true;
+    },
+
+    removeSignInFeatures() {
+      // remove register button && resend verification button
+      this.showResendVerificationButton = false;
+      this.showRegisterButton = false;
       if (document.getElementById('authorized-tag').innerHTML !== null) {
         document.getElementById('authorized-tag').innerHTML = '';
       }
       if (document.getElementById('unauthorized-reason').innerHTML !== null) {
         document.getElementById('unauthorized-reason').innerHTML = '';
       }
-      this.showRegistrationForm = true;
       this.showSignInForm = false;
-
     },
 
     /**
