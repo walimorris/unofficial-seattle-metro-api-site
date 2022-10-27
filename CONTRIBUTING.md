@@ -33,6 +33,13 @@ There are two main branches: master and develop. All development branches should
 The develop branch will then be merged into the master branch on releases. All branches you create should be descriptive 
 and based off of the feature you're working on and created off of the develop branch like such: 
 
-`git checkout -b your-feature-name`
+New features:
 
-Thanks!
+`git checkout -b feature/000-your-feature-name`
+
+Bugfixes: 
+
+`git checkout -b bugfix/000-your-feature-name`
+
+
+Most importantly, have fun. Thank you!
