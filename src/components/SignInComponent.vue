@@ -196,3 +196,22 @@ export default {
   },
 };
 </script>
+<style>
+  #sign-in {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 50vh;
+    width: 50vw;
+  }
+
+  #sign-in-form {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 50vh;
+    width: 50vw;
+  }
+</style>
