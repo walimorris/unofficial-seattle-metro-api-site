@@ -35,11 +35,11 @@ and based off of the feature you're working on and created off of the develop br
 
 New features:
 
-`git checkout -b feature/000-your-feature-name`
+`git checkout -b feature/000-your-feature-name develop`
 
 Bugfixes: 
 
-`git checkout -b bugfix/000-your-feature-name`
+`git checkout -b bugfix/000-your-feature-name develop`
 
 
 Most importantly, have fun. Thank you!
