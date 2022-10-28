@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "amazon-cognito-identity-js": "^5.2.11",
+    "aws-amplify": "^4.3.42",
     "core-js": "^3.6.4",
     "js-cookie": "^3.0.1",
     "vue": "^2.6.11"

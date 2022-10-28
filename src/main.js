@@ -1,6 +1,9 @@
 import Vue from 'vue';
 import App from './App.vue';
+import { Amplify, Auth } from 'aws-amplify';
+import awsconfig from './aws-exports';
 
+Amplify.configure(awsconfig);
 Vue.config.productionTip = false;
 
 new Vue({
