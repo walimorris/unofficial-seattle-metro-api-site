@@ -26,7 +26,7 @@
 <script>
 
 import * as AmazonCognitoIdentity from 'amazon-cognito-identity-js';
-import { Auth } from 'aws-amplify';
+import { Amplify, Auth } from 'aws-amplify';
 import ConfirmationRegistrationComponent from '@/components/ConfirmRegistrationComponent.vue';
 import config from '../../config/config';
 import Constants from '../../plugins/Constants.js';
@@ -63,6 +63,14 @@ export default {
     this.signInButtonElement = document.getElementById('load-sign-in-button');
     this.resendVerificationHeaderElement = document.getElementById('resend-verification-header');
     this.resendVerificationMessageElement = document.getElementById('resend-verification-message');
+
+    Amplify.configure({
+      Auth: {
+        region: config.cognito.region,
+        userPoolId: config.cognito.userPoolId,
+        userPoolWebClientId: config.cognito.clientId,
+      },
+    })
   },
 
   methods: {
@@ -119,16 +127,16 @@ export default {
      * @returns {Promise<boolean>}
      */
     async userExists(username) {
-      return await Auth.signIn(username.toLowerCase(), '123').then(response => {
-        return false;
-      }).catch(error => {
+      try {
+        return await Auth.signIn(username.toLowerCase(), '123');
+      } catch (error) {
         const code = error.code;
         console.log(error);
         switch (code) {
           case 'UserNotFoundException':
             return false;
           case 'UserNotConfirmedException':
-            return false;
+            return true;
           case 'PasswordResetRequiredException':
             return true;
           case 'NotAuthorizedException':
@@ -136,7 +144,7 @@ export default {
           default:
             return false;
         }
-      })
+      }
     },
 
     /**
