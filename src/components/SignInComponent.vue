@@ -10,7 +10,7 @@
     <form v-show="showSignInForm" id="sign-in-form">
       <input type="email" class="form-control" id="sign-in-username" placeholder="User Name">
       <input type="password" class="form-control" id="sign-in-password" placeholder="Password">
-      <button type="button" class="Sign in" v-on:click="signIn()">Sign In</button>
+      <button type="button" class="Sign in" id="sign-in-button" v-on:click="signIn()">Sign In</button>
     </form>
     <button v-show="showRegisterButton" type="button" class="Register" id="register-button" v-on:click="loadRegistrationForm()">Register</button>
     <button v-show="showResendVerificationButton" type="button" id="resend-verification-button" v-on:click="loadResendVerificationForm()">Resend Code</button>
@@ -30,7 +30,6 @@ import Cookies from 'js-cookie';
 
 export default {
   name: 'SignInComponent',
-  // eslint-disable-next-line vue/no-unused-components
   components: { RegisterComponent, ResendVerificationComponent },
   data() {
     return {
@@ -51,6 +50,14 @@ export default {
       basicRegisteredCookie: null,
       basicVerifiedCookieSet: null,
       basicVerifiedCookie: null,
+
+      signInUserNameElement: null,
+      signInPasswordElement: null,
+      signInButtonElement: null,
+      registerButtonElement: null,
+      resendVerificationButtonElement: null,
+      authorizedTagElement: null,
+      unauthorizedReasonElement: null,
     };
   },
 
@@ -63,6 +70,17 @@ export default {
     if (this.basicVerifiedCookie !== null && this.basicVerifiedCookie !== undefined) {
       this.basicVerifiedCookieSet = true;
     }
+  },
+
+  mounted() {
+    // get document elements on mount life-cycle hook
+    this.signInUserNameElement = document.getElementById('sign-in-username');
+    this.signInPasswordElement = document.getElementById('sign-in-password');
+    this.signInButtonElement = document.getElementById('sign-in-button');
+    this.registerButtonElement = document.getElementById('register-button');
+    this.resendVerificationButtonElement = document.getElementById('resend-verification-button');
+    this.authorizedTagElement = document.getElementById('authorized-tag');
+    this.unauthorizedReasonElement = document.getElementById('unauthorized-reason');
   },
 
   methods: {
@@ -84,9 +102,9 @@ export default {
      * Collects authentication data from user sign in credentials: username and password.
      */
     collectAuthenticationData() {
-      this.username = document.getElementById('sign-in-username').value;
-      this.password = document.getElementById('sign-in-password').value;
-      if (this.username !== undefined && this.password !== undefined) {
+      this.username = this.signInUserNameElement.value;
+      this.password = this.signInPasswordElement.value;
+      if (this.username !== '' && this.password !== '') {
         this.authenticationData = { Username: this.username, Password: this.password, };
       }
     },
@@ -127,17 +145,17 @@ export default {
           onSuccess(result) {
             console.log(`access token=${result.getAccessToken().getJwtToken()}`);
             this.accessToken = result.getAccessToken().getJwtToken();
-            if (document.getElementById('authorized-tag').innerHTML !== null) {
-              document.getElementById('authorized-tag').innerHTML = '*Authorized*';
+            if (this.authorizedTagElement.innerHTML !== null) {
+              this.authorizedTagElement.innerHTML = '*Authorized*';
             }
-            if (document.getElementById('unauthorized-reason').innerHTML !== null) {
-              document.getElementById('unauthorized-reason').innerHTML = '';
+            if (this.unauthorizedReasonElement.innerHTML !== null) {
+              this.unauthorizedReasonElement.innerHTML = '';
             }
           },
           onFailure(error) {
             console.log(`Error authenticating user: ${this.username} with ${error}`);
-            document.getElementById('authorized-tag').innerHTML = '*Not Authorized*';
-            document.getElementById('unauthorized-reason').innerHTML = JSON.stringify(error) + error.message;
+            this.authorizedTagElement.innerHTML = '*Not Authorized*';
+            this.unauthorizedReasonElement.innerHTML = JSON.stringify(error) + error.message;
           },
         });
       }
@@ -165,11 +183,11 @@ export default {
       // remove register button && resend verification button
       this.showResendVerificationButton = false;
       this.showRegisterButton = false;
-      if (document.getElementById('authorized-tag').innerHTML !== null) {
-        document.getElementById('authorized-tag').innerHTML = '';
+      if (this.authorizedTagElement.innerHTML !== null) {
+        this.authorizedTagElement.innerHTML = '';
       }
-      if (document.getElementById('unauthorized-reason').innerHTML !== null) {
-        document.getElementById('unauthorized-reason').innerHTML = '';
+      if (this.unauthorizedReasonElement.innerHTML !== null) {
+        this.unauthorizedReasonElement.innerHTML = '';
       }
       this.showSignInForm = false;
     },
