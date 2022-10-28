@@ -57,7 +57,7 @@ export default {
       if (this.verificationRetry < 3) {
         this.verificationRetry += 1;
         this.verificationCode = document.getElementById('verificationCode').value;
-        if (this.verificationCode !== null) {
+        if (this.verificationCode !== '') {
           if (this.cognitoUserClone !== null) {
             this.confirmMetroRegistration(this.cognitoUserClone);
           }
@@ -73,7 +73,6 @@ export default {
       if (document.getElementById('verificationCode').value !== null) {
         document.getElementById('verificationCode').value = '';
       }
-
     },
 
     /**
