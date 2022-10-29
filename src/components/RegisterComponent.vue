@@ -8,8 +8,10 @@
       <input type="email" class="form-control" id="emailInputRegister" placeholder="Email">
       <input type="password" class="form-control" id="passwordInputRegister" placeholder="Password">
       <input type="password" class="form-control" id="confirmpass" placeholder="Confirm Password">
-      <button type="button" class="register-button" v-on:click="registerUser()">Register</button>
-      <button type="button" class="load-sign-in-button" v-on:click="loadSignInForm()">Sign in</button>
+      <div class="buttons">
+        <button type="button" class="register-button" v-on:click="registerUser()">Register</button>
+        <button type="button" class="load-sign-in-button" v-on:click="loadSignInForm()">Sign in</button>
+      </div>
     </form>
     <h3 v-if="showErrorMessage" id="registration-error-message"></h3>
     <div v-if="showConfirmationRegistrationForm">
@@ -161,4 +163,46 @@ export default {
 </script>
 
 <style>
+  .unofficial-seattle-metro-spa {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 50vh;
+    width: 50vw;
+    border: 1px solid green;
+  }
+
+  #registration-form {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+
+  #registration-form > input {
+    margin-bottom: 1rem;
+  }
+
+  .buttons {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 2rem;
+    width: 11rem;
+  }
+
+  button {
+    background-color: white;
+    height: 1.5rem;
+    width: 5rem;
+    border: 1px solid gray;
+    border-radius: 3px;
+  }
+
+  button:hover {
+    cursor: pointer;
+    color: white;
+    background-color: #939292;
+  }
 </style>
