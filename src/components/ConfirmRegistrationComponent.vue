@@ -1,5 +1,5 @@
 <template>
-<div v-show="showConfirmationRegistrationForm_" id="confirm-registration">
+<div class="confirmRegistration" v-show="showConfirmationRegistrationForm_" id="confirm-registration">
   <h1 id="verified-header"></h1>
   <input type="password" class="form-control" id="verificationCode" placeholder="Enter Code">
   <button type="button" class="verify-button" v-on:click="verifyUser()">Verify</button>
@@ -57,7 +57,7 @@ export default {
       if (this.verificationRetry < 3) {
         this.verificationRetry += 1;
         this.verificationCode = document.getElementById('verificationCode').value;
-        if (this.verificationCode !== '') {
+        if (this.verificationCode !== null) {
           if (this.cognitoUserClone !== null) {
             this.confirmMetroRegistration(this.cognitoUserClone);
           }
@@ -73,6 +73,7 @@ export default {
       if (document.getElementById('verificationCode').value !== null) {
         document.getElementById('verificationCode').value = '';
       }
+
     },
 
     /**
@@ -152,4 +153,7 @@ export default {
 </script>
 
 <style>
+.confirmRegistration {
+  border: 1px solid blue;
+}
 </style>
