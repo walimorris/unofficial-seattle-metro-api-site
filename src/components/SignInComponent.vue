@@ -32,7 +32,6 @@ import Cookies from 'js-cookie';
 
 export default {
   name: 'SignInComponent',
-  // eslint-disable-next-line vue/no-unused-components
   components: { RegisterComponent, ResendVerificationComponent },
   data() {
     return {
@@ -163,6 +162,9 @@ export default {
       this.showResendVerificationForm = true;
     },
 
+    /**
+     * Removes all sign-in features, including error messages, from the view.
+     */
     removeSignInFeatures() {
       // remove register button && resend verification button
       this.showResendVerificationButton = false;
