@@ -208,6 +208,7 @@ export default {
     width: 40vw;
     border: 1px solid #8e8d8d;
     box-shadow: 10px 10px #9f9f9f;
+    background-color: white;
   }
 
   h1 {
