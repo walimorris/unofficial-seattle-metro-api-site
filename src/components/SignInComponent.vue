@@ -10,10 +10,12 @@
     <form v-show="showSignInForm" id="sign-in-form">
       <input type="email" class="form-control" id="sign-in-username" placeholder="User Name">
       <input type="password" class="form-control" id="sign-in-password" placeholder="Password">
-      <button type="button" class="Sign in" v-on:click="signIn()">Sign In</button>
+      <button type="button" class="sign-in-button" v-on:click="signIn()">Sign In</button>
     </form>
-    <button v-show="showRegisterButton" type="button" class="Register" id="register-button" v-on:click="loadRegistrationForm()">Register</button>
-    <button v-show="showResendVerificationButton" type="button" id="resend-verification-button" v-on:click="loadResendVerificationForm()">Resend Code</button>
+    <div class="buttons">
+      <button v-show="showRegisterButton" type="button" class="Register" id="register-button" v-on:click="loadRegistrationForm()">Register</button>
+      <button v-show="showResendVerificationButton" type="button" id="resend-verification-button" v-on:click="loadResendVerificationForm()">Resend Code</button>
+    </div>
     <h3 id="authorized-tag"></h3>
     <h3 id="unauthorized-reason"></h3>
   </div>
@@ -203,7 +205,13 @@ export default {
     justify-content: center;
     align-items: center;
     height: 50vh;
-    width: 50vw;
+    width: 40vw;
+    border: 1px solid #8e8d8d;
+    box-shadow: 10px 10px #9f9f9f;
+  }
+
+  h1 {
+    padding-bottom: 2rem;
   }
 
   #sign-in-form {
@@ -211,7 +219,21 @@ export default {
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    height: 50vh;
-    width: 50vw;
+  }
+
+  input {
+    margin-bottom: 1rem;
+  }
+
+  .sign-in-button {
+    margin-bottom: 1rem;
+  }
+
+  .buttons {
+    width: 15rem;
+  }
+
+  .buttons > button {
+    width: 6rem;
   }
 </style>
