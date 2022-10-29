@@ -1,5 +1,5 @@
 <template>
-<div v-show="showConfirmationRegistrationForm_" id="confirm-registration">
+<div class="confirmRegistration" v-show="showConfirmationRegistrationForm_" id="confirm-registration">
   <h1 id="verified-header"></h1>
   <input type="password" class="form-control" id="verificationCode" placeholder="Enter Code">
   <button type="button" class="verify-button" v-on:click="verifyUser()">Verify</button>
@@ -153,4 +153,7 @@ export default {
 </script>
 
 <style>
+.confirmRegistration {
+  border: 1px solid blue;
+}
 </style>
