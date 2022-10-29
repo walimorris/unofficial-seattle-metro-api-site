@@ -168,9 +168,8 @@ export default {
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    height: 50vh;
-    width: 50vw;
-    border: 1px solid green;
+    height: 100%;
+    width: 100%;
   }
 
   #registration-form {
