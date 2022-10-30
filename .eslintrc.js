@@ -5,18 +5,33 @@
 
 module.exports = {
   root: true,
+
   extends: [
     "plugin:vue/essential",
     "eslint:recommended",
   ],
+
   parserOptions:  {
     "parser": "babel-eslint"
   },
+
   rules: {
     'no-console': "off",
     'max-len': "off",
     'no-trailing-spaces': "off",
     'no-debugger': 'off',
     'no-unused-vars': "warn",
-  }
+  },
+
+  overrides: [
+    {
+      files: [
+        '**/__tests__/*.{j,t}s?(x)',
+        '**/tests/unit/**/*.spec.{j,t}s?(x)'
+      ],
+      env: {
+        jest: true
+      }
+    }
+  ]
 }

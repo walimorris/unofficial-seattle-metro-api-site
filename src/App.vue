@@ -6,7 +6,7 @@
 
 <script>
 // import RegisterComponent from './components/RegisterComponent.vue';
-import SignInComponent from './components/SignInComponent.vue';
+import SignInComponent from '@/components/SignInComponent.vue';
 
 export default {
   name: 'App',
