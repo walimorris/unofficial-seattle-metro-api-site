@@ -58,10 +58,10 @@ export default {
   created() {
     this.basicRegisteredCookie = this.getBasicRegisteredCookieIfExists();
     this.basicVerifiedCookie = this.getBasicVerifiedCookieIfExists();
-    if (this.basicRegisteredCookie !== null && this.basicRegisteredCookie !== undefined) {
+    if (this.basicRegisteredCookie !== null) {
       this.basicRegisteredCookieSet = true;
     }
-    if (this.basicVerifiedCookie !== null && this.basicVerifiedCookie !== undefined) {
+    if (this.basicVerifiedCookie !== null) {
       this.basicVerifiedCookieSet = true;
     }
   },
@@ -75,21 +75,41 @@ export default {
      * @see CognitoIdentityServiceProvider
      */
     signIn() {
-      this.collectAuthenticationData();
-      this.buildCognitoUser();
-      const authenticationDetails = new CognitoIdentityServiceProvider.AuthenticationDetails(this.authenticationData);
-      this.authenticateUser(authenticationDetails);
+      this.toggleAuthorizedTagOff();
+      if (this.collectAuthenticationData()) {
+        this.buildCognitoUser();
+        const authenticationDetails = new CognitoIdentityServiceProvider
+          .AuthenticationDetails(this.authenticationData);
+
+        this.authenticateUser(authenticationDetails);
+      }
     },
 
     /**
      * Collects authentication data from user sign in credentials: username and password.
+     *
+     * @return {boolean} collected username and password returns true and false otherwise
      */
     collectAuthenticationData() {
       this.username = document.getElementById('sign-in-username').value;
       this.password = document.getElementById('sign-in-password').value;
-      if (this.username !== undefined && this.password !== undefined) {
-        this.authenticationData = { Username: this.username, Password: this.password, };
+
+      // checks for any missing sign-in credential
+      if (this.username === '' || this.password === '') {
+        this.removeSignInInputValues();
+        document.getElementById('unauthorized-reason').innerHTML = 'oops missed a credential';
+        return false;
+      } else {
+        if (this.isValidUserName(this.username)) {
+          this.authenticationData = { Username: this.username, Password: this.password, };
+          return true;
+        } else {
+          // report in valid username
+          this.removeSignInInputValues();
+          document.getElementById('unauthorized-reason').innerHTML = 'invalid username';
+        }
       }
+      return false;
     },
 
     /**
@@ -121,7 +141,7 @@ export default {
      * @see AmazonCognitoIdentity
      * @see CognitoUser
      */
-    authenticateUser(authenticationData) {
+    async authenticateUser(authenticationData) {
       if (authenticationData !== null) {
         this.cognitoUser.authenticateUser(authenticationData, {
 
@@ -138,9 +158,10 @@ export default {
           onFailure(error) {
             console.log(`Error authenticating user: ${this.username} with ${error}`);
             document.getElementById('authorized-tag').innerHTML = '*Not Authorized*';
-            document.getElementById('unauthorized-reason').innerHTML = JSON.stringify(error) + error.message;
+            document.getElementById('unauthorized-reason').innerHTML = error.message;
           },
         });
+        this.removeSignInInputValues();
       }
     },
 
@@ -169,13 +190,35 @@ export default {
       // remove register button && resend verification button
       this.showResendVerificationButton = false;
       this.showRegisterButton = false;
-      if (document.getElementById('authorized-tag').innerHTML !== null) {
-        document.getElementById('authorized-tag').innerHTML = '';
-      }
+      this.toggleAuthorizedTagOff();
+      this.toggleUnAuthorizedReasonOff();
+      this.showSignInForm = false;
+    },
+
+    /**
+     * Clears sign-in username and password input values.
+     */
+    removeSignInInputValues() {
+      document.getElementById('sign-in-username').value = '';
+      document.getElementById('sign-in-password').value = '';
+    },
+
+    /**
+     * Clears unauthorized-reason element of any text content.
+     */
+    toggleUnAuthorizedReasonOff() {
       if (document.getElementById('unauthorized-reason').innerHTML !== null) {
         document.getElementById('unauthorized-reason').innerHTML = '';
       }
-      this.showSignInForm = false;
+    },
+
+    /**
+     * Clears authorized-tag element of any text content.
+     */
+    toggleAuthorizedTagOff() {
+      if (document.getElementById('authorized-tag').innerHTML !== null) {
+        document.getElementById('authorized-tag').innerHTML = '';
+      }
     },
 
     /**
@@ -197,9 +240,25 @@ export default {
     getBasicVerifiedCookieIfExists() {
       return Cookies.get('_Secure-BasicVerifiedCookie');
     },
+
+    /**
+     * Matches a username to a correct email address given a regex pattern. Truthy if the email is
+     * valid, false otherwise.
+     *
+     * @param username sign-in username
+     * @returns {boolean}
+     */
+    isValidUserName(username) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      const isValid = new RegExp(emailRegex).test(username.toLowerCase());
+      console.log(`valid email address: ${isValid}`);
+      return isValid;
+    },
   },
 };
+
 </script>
+
 <style>
   #sign-in {
     display: flex;
