@@ -1,10 +1,10 @@
 <template>
   <div id="sign-in">
-    <h1 v-show="showSignInForm">Sign In</h1>
-    <div v-show="showRegistrationForm">
+    <h1 id="sign-in-default-header" v-show="showSignInForm">Sign In</h1>
+    <div id="registration-form" v-show="showRegistrationForm">
       <RegisterComponent></RegisterComponent>
     </div>
-    <div v-if="showResendVerificationForm">
+    <div id="resend-verification-form" v-if="showResendVerificationForm">
       <ResendVerificationComponent></ResendVerificationComponent>
     </div>
     <form v-show="showSignInForm" id="sign-in-form">
