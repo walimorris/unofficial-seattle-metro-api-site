@@ -1,5 +1,10 @@
 <template>
   <div id="sign-in">
+    <button v-show="showForgotPasswordButton"
+            type="button"
+            id="forgot-password-button"
+            v-on:click="loadForgotPasswordForm()">Forgot PW</button>
+
     <h1 id="sign-in-default-header" v-show="showSignInForm">Sign In</h1>
     <div id="registration-form" v-show="showRegistrationForm">
       <RegisterComponent></RegisterComponent>
@@ -7,14 +12,24 @@
     <div id="resend-verification-form" v-if="showResendVerificationForm">
       <ResendVerificationComponent></ResendVerificationComponent>
     </div>
+    <div id="forgot-password-form" v-if="showForgotPasswordForm">
+      <ForgotPasswordComponent></ForgotPasswordComponent>
+    </div>
     <form v-show="showSignInForm" id="sign-in-form">
       <input type="email" class="form-control" id="sign-in-username" placeholder="User Name">
       <input type="password" class="form-control" id="sign-in-password" placeholder="Password">
       <button type="button" class="sign-in-button" v-on:click="signIn()">Sign In</button>
     </form>
     <div class="buttons">
-      <button v-show="showRegisterButton" type="button" class="Register" id="register-button" v-on:click="loadRegistrationForm()">Register</button>
-      <button v-show="showResendVerificationButton" type="button" id="resend-verification-button" v-on:click="loadResendVerificationForm()">Resend Code</button>
+      <button v-show="showRegisterButton"
+              type="button" class="Register"
+              id="register-button"
+              v-on:click="loadRegistrationForm()">Register</button>
+
+      <button v-show="showResendVerificationButton"
+              type="button"
+              id="resend-verification-button"
+              v-on:click="loadResendVerificationForm()">Resend Code</button>
     </div>
     <h3 id="authorized-tag"></h3>
     <h3 id="unauthorized-reason"></h3>
@@ -29,10 +44,11 @@ import config from '../../config/config';
 import RegisterComponent from '@/components/RegisterComponent.vue';
 import ResendVerificationComponent from '@/components/ResendVerificationComponent.vue';
 import Cookies from 'js-cookie';
+import ForgotPasswordComponent from '@/components/ForgotPasswordComponent';
 
 export default {
   name: 'SignInComponent',
-  components: { RegisterComponent, ResendVerificationComponent },
+  components: { ForgotPasswordComponent, RegisterComponent, ResendVerificationComponent },
   data() {
     return {
       username: null,
@@ -48,6 +64,8 @@ export default {
       showRegisterButton: true,
       showResendVerificationForm: false,
       showResendVerificationButton: true,
+      showForgotPasswordForm: false,
+      showForgotPasswordButton: true,
       basicRegisteredCookieSet: null,
       basicRegisteredCookie: null,
       basicVerifiedCookieSet: null,
@@ -64,6 +82,17 @@ export default {
     if (this.basicVerifiedCookie !== null) {
       this.basicVerifiedCookieSet = true;
     }
+  },
+
+  mounted() {
+    const amazonCognitoAuthScript = document.createElement('script');
+    amazonCognitoAuthScript.setAttribute('src', 'js/amazon-cognito-auth.min.js');
+
+    const amazonSdkScript = document.createElement('script');
+    amazonSdkScript.setAttribute('src', 'https://sdk.amazonaws.com/js/aws-sdk-2.7.16.min.js');
+
+    document.head.appendChild(amazonCognitoAuthScript);
+    document.head.appendChild(amazonSdkScript);
   },
 
   methods: {
@@ -184,12 +213,22 @@ export default {
     },
 
     /**
+     * Loads forgot password form from the sign in view, this action removes any sign
+     * in attributes or text.
+     */
+    loadForgotPasswordForm() {
+      this.removeSignInFeatures();
+      this.showForgotPasswordForm = true;
+    },
+
+    /**
      * Removes all sign-in features, including error messages, from the view.
      */
     removeSignInFeatures() {
       // remove register button && resend verification button
       this.showResendVerificationButton = false;
       this.showRegisterButton = false;
+      this.showForgotPasswordButton = false;
       this.toggleAuthorizedTagOff();
       this.toggleUnAuthorizedReasonOff();
       this.showSignInForm = false;
@@ -270,6 +309,17 @@ export default {
     border: 1px solid #8e8d8d;
     box-shadow: 10px 10px #9f9f9f;
     background-color: white;
+  }
+
+  /* added for poc styling for forgot-password button
+  and this will/should be updated */
+  #forgot-password-button {
+    background-color: transparent;
+    background-repeat: no-repeat;
+    text-decoration: underline;
+    border: none;
+    cursor: pointer;
+    outline: none;
   }
 
   h1 {

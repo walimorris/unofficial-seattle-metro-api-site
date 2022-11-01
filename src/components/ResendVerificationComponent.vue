@@ -53,8 +53,9 @@ export default {
           if (error) {
             console.log(`Error: ${error}`);
             document.getElementById('resend-verification-message').innerHTML = `${error}`;
-            if (document.getElementById('user-email').value !== null)
+            if (document.getElementById('user-email').value !== null) {
               document.getElementById('user-email').value = '';
+            }
           } else {
             document.getElementById('resend-verification-message').innerHTML = 'Check Email for Code';
             this.codeDeliveryDetails = result;
