@@ -20,8 +20,6 @@
 
 <script>
 import ResendVerificationComponent from '@/components/ResendVerificationComponent';
-import config from '../../config/config';
-import AmazonCognitoIdentity from 'amazon-cognito-identity-js';
 
 export default {
   name: 'ForgotPasswordComponent',
@@ -29,10 +27,7 @@ export default {
   data() {
     return {
       username: null,
-      poolData: null,
-      userPool: null,
       cognitoUser: null,
-      userData: null,
       showForgotPasswordForm: true,
       showResendVerificationForm: false,
       showPasswordErrorMessage: false,
@@ -46,26 +41,28 @@ export default {
     executeForgotPassword() {
       this.username = document.getElementById('forgot-password-username').value;
       if (this.username !== '') {
-        if (this.isValidUserName(this.username)) {
+        if (this.$helpers.isValidUserName(this.username)) {
           // set up cognito user
-          this.buildCognitoUser();
+          this.cognitoUser = this.$helpers.buildCognitoUser(this.username);
 
           // call forgot password on cognito user
           if (this.cognitoUser !== null) {
             this.cognitoUser.forgotPassword( {
               onSuccess(result) {
-                this.clearForgotPasswordInput();
+                if (document.getElementById('forgot-password-username').value !== null) {
+                  document.getElementById('forgot-password-username').value = '';
+                }
                 this.showPasswordErrorMessage = false;
-                this.showPasswordConfirmMessage = true;
-                document.getElementById('forgot-password-confirm-message').innerHTML = 'Check Email for Code';
                 this.codeDeliveryDetails = result;
                 console.log(result);
               },
               onFailure(error) {
                 console.log(`Error: ${error}`);
-                this.clearForgotPasswordInput();
+                if (document.getElementById('forgot-password-username').value !== null) {
+                  document.getElementById('forgot-password-username').value = '';
+                }
                 this.showPasswordErrorMessage = true;
-                document.getElementById('forgot-password-message').innerHTML = `${error}`;
+                document.getElementById('forgot-password-message').innerHTML = error.message;
                 if (document.getElementById('forgot-password-username').value !== null) {
                   document.getElementById('forgot-password-username').value = '';
                 }
@@ -94,38 +91,10 @@ export default {
       window.location.reload();
     },
 
-    /**
-     * Collects user data from sign in username and user pool data.
-     */
-    collectUserData() {
-      this.userData = { Username: this.username, Pool: this.userPool, };
-    },
-
     clearForgotPasswordInput() {
       if (document.getElementById('forgot-password-username').value !== null) {
         document.getElementById('forgot-password-username').value = '';
       }
-    },
-
-    /**
-     * Builds a cognito user by building user pool data with cognito pool id, cognito
-     * client id and username.
-     *
-     * @see CognitoUser
-     * @see CognitoIdentityServiceProvider
-     */
-    buildCognitoUser() {
-      this.poolData = { UserPoolId: config.cognito.userPoolId, ClientId: config.cognito.clientId, };
-      this.userPool = new AmazonCognitoIdentity.CognitoUserPool(this.poolData);
-      this.collectUserData();
-      this.cognitoUser = new AmazonCognitoIdentity.CognitoUser(this.userData);
-    },
-
-    isValidUserName(username) {
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      const isValid = new RegExp(emailRegex).test(username.toLowerCase());
-      console.log(`valid email address: ${isValid}`);
-      return isValid;
     },
   }
 };

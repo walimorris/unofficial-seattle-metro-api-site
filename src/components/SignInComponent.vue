@@ -39,12 +39,10 @@
 <script>
 
 import * as CognitoIdentityServiceProvider from 'amazon-cognito-identity-js';
-import * as AmazonCognitoIdentity from 'amazon-cognito-identity-js';
-import config from '../../config/config';
 import RegisterComponent from '@/components/RegisterComponent.vue';
 import ResendVerificationComponent from '@/components/ResendVerificationComponent.vue';
-import Cookies from 'js-cookie';
 import ForgotPasswordComponent from '@/components/ForgotPasswordComponent';
+import Cookies from 'js-cookie';
 
 export default {
   name: 'SignInComponent',
@@ -54,10 +52,7 @@ export default {
       username: null,
       password: null,
       authenticationData: null,
-      poolData: null,
-      userPool: null,
       cognitoUser: null,
-      userData: null,
       accessToken: null,
       showSignInForm: true,
       showRegistrationForm: false,
@@ -84,17 +79,6 @@ export default {
     }
   },
 
-  mounted() {
-    const amazonCognitoAuthScript = document.createElement('script');
-    amazonCognitoAuthScript.setAttribute('src', 'js/amazon-cognito-auth.min.js');
-
-    const amazonSdkScript = document.createElement('script');
-    amazonSdkScript.setAttribute('src', 'https://sdk.amazonaws.com/js/aws-sdk-2.7.16.min.js');
-
-    document.head.appendChild(amazonCognitoAuthScript);
-    document.head.appendChild(amazonSdkScript);
-  },
-
   methods: {
 
     /**
@@ -106,7 +90,7 @@ export default {
     signIn() {
       this.toggleAuthorizedTagOff();
       if (this.collectAuthenticationData()) {
-        this.buildCognitoUser();
+        this.cognitoUser = this.$helpers.buildCognitoUser(this.username);
         const authenticationDetails = new CognitoIdentityServiceProvider
           .AuthenticationDetails(this.authenticationData);
 
@@ -129,7 +113,7 @@ export default {
         document.getElementById('unauthorized-reason').innerHTML = 'oops missed a credential';
         return false;
       } else {
-        if (this.isValidUserName(this.username)) {
+        if (this.$helpers.isValidUserName(this.username)) {
           this.authenticationData = { Username: this.username, Password: this.password, };
           return true;
         } else {
@@ -139,27 +123,6 @@ export default {
         }
       }
       return false;
-    },
-
-    /**
-     * Builds a cognito user by building user pool data with cognito pool id, cognito
-     * client id and username.
-     *
-     * @see CognitoUser
-     * @see CognitoIdentityServiceProvider
-     */
-    buildCognitoUser() {
-      this.poolData = { UserPoolId: config.cognito.userPoolId, ClientId: config.cognito.clientId, };
-      this.userPool = new AmazonCognitoIdentity.CognitoUserPool(this.poolData);
-      this.collectUserData();
-      this.cognitoUser = new CognitoIdentityServiceProvider.CognitoUser(this.userData);
-    },
-
-    /**
-     * Collects user data from sign in username and user pool data.
-     */
-    collectUserData() {
-      this.userData = { Username: this.username, Pool: this.userPool, };
     },
 
     /**
@@ -278,21 +241,7 @@ export default {
      */
     getBasicVerifiedCookieIfExists() {
       return Cookies.get('_Secure-BasicVerifiedCookie');
-    },
-
-    /**
-     * Matches a username to a correct email address given a regex pattern. Truthy if the email is
-     * valid, false otherwise.
-     *
-     * @param username sign-in username
-     * @returns {boolean}
-     */
-    isValidUserName(username) {
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      const isValid = new RegExp(emailRegex).test(username.toLowerCase());
-      console.log(`valid email address: ${isValid}`);
-      return isValid;
-    },
+    }
   },
 };
 
