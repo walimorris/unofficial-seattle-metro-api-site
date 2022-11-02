@@ -22,10 +22,8 @@
 </template>
 
 <script>
-import * as AmazonCognitoIdentity from 'amazon-cognito-identity-js';
 import ConfirmationRegistrationComponent from '@/components/ConfirmRegistrationComponent.vue';
 import Cookies from 'js-cookie';
-import config from '../../config/config';
 
 export default {
   name: 'RegisterComponent',
@@ -37,6 +35,7 @@ export default {
       passwordConfirmation: null,
       personalName: null,
       poolData: null,
+      userPool: null,
       registered: false,
       cognitoUser: null,
       attributeList: [],
@@ -69,18 +68,18 @@ export default {
         console.log('Passwords do not match!');
         throw new Error('Passwords do not match');
       }
-      this.poolData = { UserPoolId: config.cognito.userPoolId, ClientId: config.cognito.clientId, };
-      const userPool = new AmazonCognitoIdentity.CognitoUserPool(this.poolData);
+      this.poolData = this.$helpers.collectUserPoolData();
+      this.userPool = this.$helpers.getUserPool(this.poolData);
       const dataEmail = { Name: 'email', Value: this.username, };
       const dataPersonalName = { Name: 'name', Value: this.personalName, };
-      const attributeEmail = new AmazonCognitoIdentity.CognitoUserAttribute(dataEmail);
+      const attributeEmail = this.$helpers.getCognitoAttributeEmail(dataEmail);
+      const attributePersonalName = this.$helpers.getCognitoAttributePersonalName(dataPersonalName);
 
-      const attributePersonalName = new AmazonCognitoIdentity.CognitoUserAttribute(dataPersonalName);
       this.attributeList.push(attributeEmail);
       this.attributeList.push(attributePersonalName);
 
       // sign user up through user pool
-      userPool.signUp(this.username, this.password, this.attributeList, null, (error, result) => {
+      this.userPool.signUp(this.username, this.password, this.attributeList, null, (error, result) => {
         if (error) {
           console.log(error.message);
           this.showErrorMessage = true;
@@ -106,7 +105,7 @@ export default {
      */
     setBasicRegisteredCookie() {
       if (this.registered === true) {
-        const value = this.generateRandomId(15);
+        const value = this.$helpers.generateRandomId(15);
         const basicRegisteredCookieName = '_Secure-BasicRegisteredCookie';
         Cookies.set(basicRegisteredCookieName, value, { expires: 7, sameSite: 'strict' });
         if (Cookies.get(basicRegisteredCookieName) !== undefined) {
@@ -142,22 +141,6 @@ export default {
       }
       window.location.reload();
     },
-
-    /**
-     * Generates a random id.
-     *
-     * @param length the generated id length
-     * @returns {string}
-     */
-    generateRandomId(length) {
-      let result = '';
-      const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-      const charactersLength = characters.length;
-      for (let i = 0; i < length; i += 1) {
-        result += characters.charAt(Math.floor(Math.random() * charactersLength));
-      }
-      return result;
-    },
   },
 };
 </script>
@@ -168,9 +151,8 @@ export default {
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    height: 50vh;
-    width: 50vw;
-    border: 1px solid green;
+    height: 100%;
+    width: 100%;
   }
 
   #registration-form {

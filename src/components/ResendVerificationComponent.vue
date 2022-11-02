@@ -16,9 +16,7 @@
 
 <script>
 
-import * as AmazonCognitoIdentity from 'amazon-cognito-identity-js';
 import ConfirmationRegistrationComponent from '@/components/ConfirmRegistrationComponent.vue';
-import config from '../../config/config';
 
 export default {
   name: 'ResendVerificationComponent',
@@ -26,10 +24,7 @@ export default {
   data() {
     return {
       username: null,
-      poolData: null,
-      userPool: null,
       cognitoUser: null,
-      attributeList: [],
       verified: false,
       showSignInButton: true,
       showResendVerificationCodeForm: true,
@@ -44,21 +39,17 @@ export default {
     resendVerificationCode() {
       this.username = document.getElementById('user-email').value;
       if (this.username !== undefined) {
-        this.poolData = { UserPoolId: config.cognito.userPoolId, ClientId: config.cognito.clientId, };
-        this.userPool = new AmazonCognitoIdentity.CognitoUserPool(this.poolData);
-        const userData = { Username: this.username, Pool: this.userPool, };
-        this.cognitoUser = new AmazonCognitoIdentity.CognitoUser(userData);
+        this.cognitoUser = this.$helpers.buildCognitoUser(this.username);
 
         this.cognitoUser.resendConfirmationCode((error, result) => {
           if (error) {
-            console.log(`Error: ${error}`);
             document.getElementById('resend-verification-message').innerHTML = `${error}`;
-            if (document.getElementById('user-email').value !== null)
+            if (document.getElementById('user-email').value !== null) {
               document.getElementById('user-email').value = '';
+            }
           } else {
             document.getElementById('resend-verification-message').innerHTML = 'Check Email for Code';
             this.codeDeliveryDetails = result;
-            console.log(result);
             this.loadConfirmRegistrationForm();
           }
         });
@@ -75,11 +66,9 @@ export default {
     loadConfirmRegistrationForm() {
       this.removeResendVerificationFeatures();
       this.showConfirmationRegistrationForm = true;
-      console.log('Show confirmation regisraionform' + this.showConfirmationRegistrationForm);
     },
 
     removeResendVerificationFeatures() {
-      console.log('Removing verifcation form features!')
       this.showSignInButton = false;
       if (document.getElementById('resend-verification-message').innerHTML !== null) {
         document.getElementById('resend-verification-message').innerHTML = '';
