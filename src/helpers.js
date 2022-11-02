@@ -32,6 +32,15 @@ const generateRandomId = (length) => {
 };
 
 /**
+ * Conducts a timeout in milliseconds.
+ * @param ms time in ms
+ * @returns {Promise<unknown>}
+ */
+const sleep = (ms) => {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+};
+
+/**
  * Collects user data from sign in username and user pool data.
  */
 const collectUserData = (username, userPool) => {
@@ -98,5 +107,5 @@ const buildCognitoUser = (username) => {
 
 export default {
   isValidUserName, buildCognitoUser, generateRandomId, collectUserPoolData, collectUserData,
-  getUserPool, getCognitoAttributePersonalName, getCognitoAttributeEmail,
+  getUserPool, getCognitoAttributePersonalName, getCognitoAttributeEmail, sleep
 };

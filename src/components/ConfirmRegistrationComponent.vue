@@ -86,16 +86,7 @@ export default {
           window.location.reload();
         }
       });
-      await (this.sleep(3000));
-    },
-
-    /**
-     * Conducts a timeout in milliseconds.
-     * @param ms time in ms
-     * @returns {Promise<unknown>}
-     */
-    sleep(ms) {
-      return new Promise((resolve) => setTimeout(resolve, ms));
+      await (this.$helpers.sleep(3000));
     },
 
     insertVerificationTextOnMount() {
