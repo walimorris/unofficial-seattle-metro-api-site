@@ -1,5 +1,10 @@
 <template>
   <div id="sign-in">
+    <button v-show="showForgotPasswordButton"
+            type="button"
+            id="forgot-password-button"
+            v-on:click="loadForgotPasswordForm()">Forgot PW</button>
+
     <h1 id="sign-in-default-header" v-show="showSignInForm">Sign In</h1>
     <div id="registration-form" v-show="showRegistrationForm">
       <RegisterComponent></RegisterComponent>
@@ -7,14 +12,24 @@
     <div id="resend-verification-form" v-if="showResendVerificationForm">
       <ResendVerificationComponent></ResendVerificationComponent>
     </div>
+    <div id="forgot-password-form" v-if="showForgotPasswordForm">
+      <ForgotPasswordComponent></ForgotPasswordComponent>
+    </div>
     <form v-show="showSignInForm" id="sign-in-form">
       <input type="email" class="form-control" id="sign-in-username" placeholder="User Name">
       <input type="password" class="form-control" id="sign-in-password" placeholder="Password">
       <button type="button" class="sign-in-button" v-on:click="signIn()">Sign In</button>
     </form>
     <div class="buttons">
-      <button v-show="showRegisterButton" type="button" class="Register" id="register-button" v-on:click="loadRegistrationForm()">Register</button>
-      <button v-show="showResendVerificationButton" type="button" id="resend-verification-button" v-on:click="loadResendVerificationForm()">Resend Code</button>
+      <button v-show="showRegisterButton"
+              type="button" class="Register"
+              id="register-button"
+              v-on:click="loadRegistrationForm()">Register</button>
+
+      <button v-show="showResendVerificationButton"
+              type="button"
+              id="resend-verification-button"
+              v-on:click="loadResendVerificationForm()">Resend Code</button>
     </div>
     <h3 id="authorized-tag"></h3>
     <h3 id="unauthorized-reason"></h3>
@@ -24,30 +39,28 @@
 <script>
 
 import * as CognitoIdentityServiceProvider from 'amazon-cognito-identity-js';
-import * as AmazonCognitoIdentity from 'amazon-cognito-identity-js';
-import config from '../../config/config';
 import RegisterComponent from '@/components/RegisterComponent.vue';
 import ResendVerificationComponent from '@/components/ResendVerificationComponent.vue';
+import ForgotPasswordComponent from '@/components/ForgotPasswordComponent';
 import Cookies from 'js-cookie';
 
 export default {
   name: 'SignInComponent',
-  components: { RegisterComponent, ResendVerificationComponent },
+  components: { ForgotPasswordComponent, RegisterComponent, ResendVerificationComponent },
   data() {
     return {
       username: null,
       password: null,
       authenticationData: null,
-      poolData: null,
-      userPool: null,
       cognitoUser: null,
-      userData: null,
       accessToken: null,
       showSignInForm: true,
       showRegistrationForm: false,
       showRegisterButton: true,
       showResendVerificationForm: false,
       showResendVerificationButton: true,
+      showForgotPasswordForm: false,
+      showForgotPasswordButton: true,
       basicRegisteredCookieSet: null,
       basicRegisteredCookie: null,
       basicVerifiedCookieSet: null,
@@ -77,7 +90,7 @@ export default {
     signIn() {
       this.toggleAuthorizedTagOff();
       if (this.collectAuthenticationData()) {
-        this.buildCognitoUser();
+        this.cognitoUser = this.$helpers.buildCognitoUser(this.username);
         const authenticationDetails = new CognitoIdentityServiceProvider
           .AuthenticationDetails(this.authenticationData);
 
@@ -100,7 +113,7 @@ export default {
         document.getElementById('unauthorized-reason').innerHTML = 'oops missed a credential';
         return false;
       } else {
-        if (this.isValidUserName(this.username)) {
+        if (this.$helpers.isValidUserName(this.username)) {
           this.authenticationData = { Username: this.username, Password: this.password, };
           return true;
         } else {
@@ -110,27 +123,6 @@ export default {
         }
       }
       return false;
-    },
-
-    /**
-     * Builds a cognito user by building user pool data with cognito pool id, cognito
-     * client id and username.
-     *
-     * @see CognitoUser
-     * @see CognitoIdentityServiceProvider
-     */
-    buildCognitoUser() {
-      this.poolData = { UserPoolId: config.cognito.userPoolId, ClientId: config.cognito.clientId, };
-      this.userPool = new AmazonCognitoIdentity.CognitoUserPool(this.poolData);
-      this.collectUserData();
-      this.cognitoUser = new CognitoIdentityServiceProvider.CognitoUser(this.userData);
-    },
-
-    /**
-     * Collects user data from sign in username and user pool data.
-     */
-    collectUserData() {
-      this.userData = { Username: this.username, Pool: this.userPool, };
     },
 
     /**
@@ -184,12 +176,22 @@ export default {
     },
 
     /**
+     * Loads forgot password form from the sign in view, this action removes any sign
+     * in attributes or text.
+     */
+    loadForgotPasswordForm() {
+      this.removeSignInFeatures();
+      this.showForgotPasswordForm = true;
+    },
+
+    /**
      * Removes all sign-in features, including error messages, from the view.
      */
     removeSignInFeatures() {
       // remove register button && resend verification button
       this.showResendVerificationButton = false;
       this.showRegisterButton = false;
+      this.showForgotPasswordButton = false;
       this.toggleAuthorizedTagOff();
       this.toggleUnAuthorizedReasonOff();
       this.showSignInForm = false;
@@ -239,21 +241,7 @@ export default {
      */
     getBasicVerifiedCookieIfExists() {
       return Cookies.get('_Secure-BasicVerifiedCookie');
-    },
-
-    /**
-     * Matches a username to a correct email address given a regex pattern. Truthy if the email is
-     * valid, false otherwise.
-     *
-     * @param username sign-in username
-     * @returns {boolean}
-     */
-    isValidUserName(username) {
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      const isValid = new RegExp(emailRegex).test(username.toLowerCase());
-      console.log(`valid email address: ${isValid}`);
-      return isValid;
-    },
+    }
   },
 };
 
@@ -270,6 +258,17 @@ export default {
     border: 1px solid #8e8d8d;
     box-shadow: 10px 10px #9f9f9f;
     background-color: white;
+  }
+
+  /* added for poc styling for forgot-password button
+  and this will/should be updated */
+  #forgot-password-button {
+    background-color: transparent;
+    background-repeat: no-repeat;
+    text-decoration: underline;
+    border: none;
+    cursor: pointer;
+    outline: none;
   }
 
   h1 {

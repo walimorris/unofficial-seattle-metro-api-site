@@ -8,10 +8,8 @@
 </template>
 
 <script>
-import * as AmazonCognitoIdentity from 'amazon-cognito-identity-js';
 import { CognitoUser } from 'amazon-cognito-identity-js';
 import Cookies from 'js-cookie';
-import config from '../../config/config';
 
 export default {
   name: 'ConfirmationRegistrationComponent',
@@ -28,18 +26,13 @@ export default {
       authenticationDetails: null,
       basicVerifiedCookie: null,
       basicVerifiedCookieSet: false,
-      userPool: null,
-      userData: null,
       verified: false,
       verificationRetry: 0,
       cognitoUserClone: null,
     };
   },
   created() {
-    const poolData = { UserPoolId: config.cognito.userPoolId, ClientId: config.cognito.clientId, };
-    this.userPool = new AmazonCognitoIdentity.CognitoUserPool(poolData);
-    const userData = { Username: this.username, Pool: this.userPool, };
-    this.cognitoUserClone = new AmazonCognitoIdentity.CognitoUser(userData);
+    this.cognitoUserClone = this.$helpers.buildCognitoUser(this.username);
     this.basicVerifiedCookie = this.getBasicVerifiedCookieIfExists();
   },
 
@@ -77,7 +70,7 @@ export default {
     },
 
     /**
-     * Confirm's user registration for Cognito Identity Management.
+     * Confirms user registration for Cognito Identity Management.
      * @param cognitoUser {CognitoUser}
      * @returns {Promise<void>}
      */
@@ -93,16 +86,7 @@ export default {
           window.location.reload();
         }
       });
-      await (this.sleep(3000));
-    },
-
-    /**
-     * Conducts a timeout in milliseconds.
-     * @param ms time in ms
-     * @returns {Promise<unknown>}
-     */
-    sleep(ms) {
-      return new Promise((resolve) => setTimeout(resolve, ms));
+      await (this.$helpers.sleep(3000));
     },
 
     insertVerificationTextOnMount() {
@@ -114,7 +98,7 @@ export default {
      */
     setBasicVerifiedCookie() {
       if (this.basicVerifiedCookie === undefined || this.basicVerifiedCookie === null) {
-        const value = this.generateRandomId(15);
+        const value = this.$helpers.generateRandomId(15);
         const basicVerifiedCookieName = '_Secure-BasicVerifiedCookie';
         Cookies.set(basicVerifiedCookieName, value, { expires: 7, sameSite: 'strict' });
         if (Cookies.get(basicVerifiedCookieName) !== undefined || Cookies.get(basicVerifiedCookieName) !== null) {
@@ -132,28 +116,11 @@ export default {
     getBasicVerifiedCookieIfExists() {
       return Cookies.get('_Secure-BasicVerifiedCookie');
     },
-
-    /**
-     * Generates a random id. Note: add to a shared utility folder to reuse.
-     *
-     * @param length the generated id length
-     * @returns {string}
-     */
-    generateRandomId(length) {
-      let result = '';
-      const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-      const charactersLength = characters.length;
-      for (let i = 0; i < length; i += 1) {
-        result += characters.charAt(Math.floor(Math.random() * charactersLength));
-      }
-      return result;
-    },
   },
 };
 </script>
 
 <style>
 .confirmRegistration {
-  border: 1px solid blue;
 }
 </style>
