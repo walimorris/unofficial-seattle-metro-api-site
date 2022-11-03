@@ -5,14 +5,12 @@
 </template>
 
 <script>
-// import RegisterComponent from './components/RegisterComponent.vue';
 import SignInComponent from '@/components/SignInComponent.vue';
 
 export default {
   name: 'App',
   components: {
     SignInComponent,
-    // RegisterComponent,
   },
 };
 </script>
