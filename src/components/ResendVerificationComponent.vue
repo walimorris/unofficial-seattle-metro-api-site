@@ -1,13 +1,13 @@
 <template>
   <div id="resend-verification">
     <h1 v-show="showResendVerificationCodeForm" id="resend-verification-header">Resend Verification Form</h1>
-    <form v-show="showResendVerificationCodeForm">
+    <form v-show="showResendVerificationCodeForm" id="resend-verification-form">
       <input type="email" class="form-control" id="user-email" placeholder="email">
-      <button type="button" class="verify-button" v-on:click="resendVerificationCode()">Send Code</button>
+      <button type="button" class="verify-button" id="resend-verification-button" v-on:click="resendVerificationCode()">Send Code</button>
     </form>
-    <button v-show="showSignInButton" type="button" class="load-sign-in-button" v-on:click="loadSignInForm()">Sign in</button>
+    <button v-show="showSignInButton" id="load-sign-button" type="button" class="load-sign-in-button" v-on:click="loadSignInForm()">Sign in</button>
     <h3 id="resend-verification-message"></h3>
-    <div v-if="showConfirmationRegistrationForm">
+    <div id="view-to-confirmation-registration-form" v-if="showConfirmationRegistrationForm">
       <confirmation-registration-component :username="username" :cognitoUser="cognitoUser"
                                            :showConfirmationRegistrationForm="showConfirmationRegistrationForm"/>
     </div>
@@ -38,12 +38,12 @@ export default {
 
     resendVerificationCode() {
       this.username = document.getElementById('user-email').value;
-      if (this.username !== undefined) {
+      if (this.username !== '') {
         this.cognitoUser = this.$helpers.buildCognitoUser(this.username);
 
         this.cognitoUser.resendConfirmationCode((error, result) => {
           if (error) {
-            document.getElementById('resend-verification-message').innerHTML = `${error}`;
+            document.getElementById('resend-verification-message').innerHTML = error.message;
             if (document.getElementById('user-email').value !== null) {
               document.getElementById('user-email').value = '';
             }
