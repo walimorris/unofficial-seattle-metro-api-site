@@ -18,7 +18,7 @@ phases:
     commands:
       - echo PostBuild Phase
       # Clear S3 bucket.
-      - aws s3 rm s3://s3://unofficial-seattle-metro-api-site/ --recursive
+      - aws s3 rm s3://unofficial-seattle-metro-api-site --recursive
       - echo S3 bucket is cleared.
       - aws s3 cp dist/ s3://unofficial-seattle-metro-api-site/ --recursive
 
