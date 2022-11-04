@@ -17,4 +17,7 @@ phases:
   post_build:
     commands:
       - echo PostBuild Phase
-      - aws s3 sync /dist s3://unofficial-seattle-metro-api-site
+      # Clear S3 bucket.
+      - aws s3 rm s3://unofficial-seattle-metro-api-site/ --recursive
+      - echo S3 bucket is cleared.
+      - aws s3 cp dist/ s3://unofficial-seattle-metro-api-site/ --recursive
