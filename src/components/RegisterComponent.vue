@@ -1,19 +1,19 @@
 <template>
-  <div class="unofficial-seattle-metro-spa">
+  <div class="unofficial-seattle-metro-spa" :id="REGISTER_COMPONENT_SPA">
     <h1 v-if="showRegistrationForm" class="register-component-title"
-        id="title-header">Register an Account
+        :id="REGISTER_TITLE_HEADER">Register an Account
     </h1>
-    <form v-if="showRegistrationForm" id="registration-form">
-      <input type="text" class="form-control" id="personalnameRegister" placeholder="Name">
-      <input type="email" class="form-control" id="emailInputRegister" placeholder="Email">
-      <input type="password" class="form-control" id="passwordInputRegister" placeholder="Password">
-      <input type="password" class="form-control" id="confirmpass" placeholder="Confirm Password">
+    <form v-if="showRegistrationForm" :id="REGISTER_FORM">
+      <input type="text" class="form-control" :id="PERSONAL_NAME_REGISTER" placeholder="Name">
+      <input type="email" class="form-control" :id="EMAIL_INPUT_REGISTER" placeholder="Email">
+      <input type="password" class="form-control" :id="PASSWORD_INPUT_REGISTER" placeholder="Password">
+      <input type="password" class="form-control" :id="CONFIRM_PASSWORD" placeholder="Confirm Password">
+      <h3 v-show="showErrorMessage" :id="REGISTER_ERROR_MESSAGE"></h3>
       <div class="buttons">
         <button type="button" class="register-button" v-on:click="registerUser()">Register</button>
         <button type="button" class="load-sign-in-button" v-on:click="loadSignInForm()">Sign in</button>
       </div>
     </form>
-    <h3 v-if="showErrorMessage" id="registration-error-message"></h3>
     <div v-if="showConfirmationRegistrationForm">
       <confirmation-registration-component :username="username" :cognitoUser="cognitoUser"
                                            :showConfirmationRegistrationForm="showConfirmationRegistrationForm"/>
@@ -24,6 +24,7 @@
 <script>
 import ConfirmationRegistrationComponent from '@/components/ConfirmRegistrationComponent.vue';
 import Cookies from 'js-cookie';
+import config from '../../config/config';
 
 export default {
   name: 'RegisterComponent',
@@ -44,6 +45,15 @@ export default {
       showErrorMessage: false,
       basicRegisteredCookieSet: false,
       basicRegisteredCookie: null,
+
+      REGISTER_COMPONENT_SPA: 'unofficial-seattle-metro-spa',
+      REGISTER_TITLE_HEADER: 'title-header',
+      REGISTER_FORM: 'registration-form',
+      PERSONAL_NAME_REGISTER: 'personalnameRegister',
+      EMAIL_INPUT_REGISTER: 'emailInputRegister',
+      PASSWORD_INPUT_REGISTER: 'passwordInputRegister',
+      CONFIRM_PASSWORD: 'confirmpass',
+      REGISTER_ERROR_MESSAGE: 'registration-error-message',
     };
   },
 
@@ -59,44 +69,79 @@ export default {
      * @link https://aws.amazon.com/blogs/mobile/accessing-your-user-pools-using-the-amazon-cognito-identity-sdk-for-javascript/
      */
     registerUser() {
-      this.personalName = document.getElementById('personalnameRegister').value;
-      this.password = document.getElementById('passwordInputRegister').value;
-      this.passwordConfirmation = document.getElementById('confirmpass').value;
-      this.username = document.getElementById('emailInputRegister').value;
+      this.personalName = document.getElementById(this.PERSONAL_NAME_REGISTER).value;
+      this.password = document.getElementById(this.PASSWORD_INPUT_REGISTER).value;
+      this.passwordConfirmation = document.getElementById(this.CONFIRM_PASSWORD).value;
+      this.username = document.getElementById(this.EMAIL_INPUT_REGISTER).value;
 
-      if (this.password !== this.passwordConfirmation) {
-        console.log('Passwords do not match!');
-        throw new Error('Passwords do not match');
+      const errorMessage = this.validateRegistrationInputs(this.username, this.personalName,
+        this.password, this.passwordConfirmation);
+
+      if (errorMessage !== config.FORM_VALUE.EMPTY) {
+        this.renderErrorMessage(errorMessage);
+      } else {
+        // hide errors if rendered
+        this.showErrorMessage = false;
+        this.poolData = this.$helpers.collectUserPoolData();
+        this.userPool = this.$helpers.getUserPool(this.poolData);
+        const dataEmail = { Name: 'email', Value: this.username, };
+        const dataPersonalName = { Name: 'name', Value: this.personalName, };
+        const attributeEmail = this.$helpers.getCognitoAttributeEmail(dataEmail);
+        const attributePersonalName = this.$helpers.getCognitoAttributePersonalName(dataPersonalName);
+
+        this.attributeList.push(attributeEmail);
+        this.attributeList.push(attributePersonalName);
+        this.signUpUser(this.username, this.password, this.attributeList, null);
       }
-      this.poolData = this.$helpers.collectUserPoolData();
-      this.userPool = this.$helpers.getUserPool(this.poolData);
-      const dataEmail = { Name: 'email', Value: this.username, };
-      const dataPersonalName = { Name: 'name', Value: this.personalName, };
-      const attributeEmail = this.$helpers.getCognitoAttributeEmail(dataEmail);
-      const attributePersonalName = this.$helpers.getCognitoAttributePersonalName(dataPersonalName);
+    },
 
-      this.attributeList.push(attributeEmail);
-      this.attributeList.push(attributePersonalName);
-
+    signUpUser(username, password, attributeList, validationData) {
       // sign user up through user pool
-      this.userPool.signUp(this.username, this.password, this.attributeList, null, (error, result) => {
+      this.userPool.signUp(username, password, attributeList, validationData, (error, result) => {
         if (error) {
-          console.log(error.message);
           this.showErrorMessage = true;
-          document.getElementById('registration-error-message').innerHTML = JSON.stringify(error) + error;
+          this.renderErrorMessage(error.message);
         } else {
           if (this.showErrorMessage === true) {
             this.showErrorMessage = false;
           }
           this.cognitoUser = result.user;
-          console.log(`user name: ${this.cognitoUser.username}`);
-          document.getElementById('title-header').innerHTML = 'Check your email for verification';
+          document.getElementById(this.REGISTER_TITLE_HEADER).innerHTML = config.FORM_SUCCESS_MESSAGES.CHECK_EMAIL;
           this.registered = true;
+          this.setBasicRegisteredCookie();
           this.showConfirmationRegistrationForm = true;
           this.showRegistrationForm = false;
-          this.setBasicRegisteredCookie();
         }
       });
+    },
+
+    validateRegistrationInputs(username, personalName, password, passwordConfirmation) {
+      let errorMessage = '';
+      if (username === '' || personalName === '' || password === '' || passwordConfirmation === '') {
+        return errorMessage += `${config.FORM_ERROR_MESSAGES.MISSING_VALUE}`;
+      }
+      if (!this.$helpers.isValidUserName(username)) {
+        errorMessage += `${config.FORM_ERROR_MESSAGES.INVALID_USERNAME}`;
+      }
+      if (password !== passwordConfirmation) {
+        errorMessage += `<br/>${config.FORM_ERROR_MESSAGES.PASSWORD_MISMATCH}`;
+      }
+      return errorMessage;
+    },
+
+    renderErrorMessage(errorMessage) {
+      this.showErrorMessage = true;
+      document.getElementById(this.REGISTER_ERROR_MESSAGE).style.color = config.COLOR.LIGHT_RED;
+      document.getElementById(this.REGISTER_ERROR_MESSAGE).style.fontSize = config.FONT_SIZE.SMALL;
+      document.getElementById(this.REGISTER_ERROR_MESSAGE).innerHTML = errorMessage;
+      this.clearFormInputValues();
+    },
+
+    clearFormInputValues() {
+      document.getElementById(this.PERSONAL_NAME_REGISTER).value = config.FORM_VALUE.EMPTY;
+      document.getElementById(this.PASSWORD_INPUT_REGISTER).value = config.FORM_VALUE.EMPTY;
+      document.getElementById(this.CONFIRM_PASSWORD).value = config.FORM_VALUE.EMPTY;
+      document.getElementById(this.EMAIL_INPUT_REGISTER).value = config.FORM_VALUE.EMPTY;
     },
 
     /**
@@ -163,7 +208,7 @@ export default {
   }
 
   #registration-form > input {
-    margin-bottom: 1rem;
+    margin-bottom: .8rem;
   }
 
   .buttons {
