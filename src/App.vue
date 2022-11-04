@@ -24,7 +24,7 @@ html, body {
   background-image: url("./assets/vecteezy_one-continuous-single-line-of-famous-building-like-space-needle_8267670.jpg");
   background-repeat: no-repeat;
   background-attachment: fixed;
-  background-position: 100% 40%;
+  background-position: 100% 48%;
 }
 
 #app {

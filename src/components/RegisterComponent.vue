@@ -208,7 +208,7 @@ export default {
   }
 
   #registration-form > input {
-    margin-bottom: 1rem;
+    margin-bottom: .8rem;
   }
 
   .buttons {
@@ -231,9 +231,5 @@ export default {
     cursor: pointer;
     color: white;
     background-color: #939292;
-  }
-
-  #title-header {
-    padding-top: 45px;
   }
 </style>

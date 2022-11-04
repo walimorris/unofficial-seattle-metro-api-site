@@ -285,7 +285,7 @@ export default {
   }
 
   h1 {
-    padding-bottom: 2rem;
+    padding-bottom: .8rem;
   }
 
   #sign-in-form {
@@ -300,7 +300,7 @@ export default {
   }
 
   .sign-in-button {
-    margin-bottom: 1rem;
+    margin-bottom: .8rem;
   }
 
   .buttons {
@@ -323,13 +323,13 @@ export default {
   #register-button {
     position: relative;
     left: -140px;
-    top: 60px;
+    top: -15px;
   }
 
   #resend-verification-button {
     position: relative;
     left: 145px;
-    top:60px;
+    top:-15px;
   }
 
 </style>
