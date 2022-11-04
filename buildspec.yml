@@ -14,6 +14,7 @@ phases:
     commands:
       - echo Build Phase
       - npm run build
+      - aws s3 cp dist/ s3://unofficial-seattle-metro-api-site/ --recursive
   post_build:
     commands:
       - echo PostBuild Phase
@@ -21,4 +22,5 @@ phases:
 artifacts:
   files:
     - '**/*'
+  discard-paths: yes
   base-directory: 'dist'
