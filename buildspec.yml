@@ -17,4 +17,4 @@ phases:
   post_build:
     commands:
       - echo PostBuild Phase
-      - aws s3 sync ./dist s3://unofficial-seattle-metro-api-site
+      - aws s3 sync /dist s3://unofficial-seattle-metro-api-site
