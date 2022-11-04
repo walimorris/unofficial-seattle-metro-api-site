@@ -1,25 +1,28 @@
 <template>
-  <div id="forgot-password-component">
-    <h1 id="forgot-password-component-header" v-show="showForgotPasswordForm">Forgot Password</h1>
-    <div id="update-password-form" v-if="showUpdatePasswordForm">
+  <div :id="FORGOT_PASSWORD_COMP">
+    <h1 :id="FORGOT_PASSWORD_COMP_HEADER" v-show="showForgotPasswordForm">Forgot Password</h1>
+    <div :id="UPDATE_PASSWORD_FORM" v-if="showUpdatePasswordForm">
       <UpdatePasswordComponent></UpdatePasswordComponent>
     </div>
-    <form v-show="showForgotPasswordForm" id="forgot-password-form">
+    <form v-show="showForgotPasswordForm" :id="FORGOT_PASSWORD_FORM">
       <input type="email" id="forgot-password-username" placeholder="username">
+      <h3 :id="FORGOT_PASSWORD_MESSAGE"></h3>
       <button type="button"
-              id="forgot-password-execute-button"
+              :id="FORGOT_PASSWORD_EXECUTION_BUTTON"
               v-on:click="executeForgotPassword()">Submit</button>
     </form>
     <div>
-      <button v-show="showSignInButton" type="button" id="sign-in-view-button" v-on:click="loadSignInForm()">Sign In</button>
+      <button v-show="showSignInButton"
+              type="button"
+              :id="SIGN_IN_BUTTON" v-on:click="loadSignInForm()">Sign In</button>
     </div>
-    <h3 id="forgot-password-message"></h3>
-    <h3 id="forgot-password-confirm-message"></h3>
+    <h3 :id="FORGOT_PASSWORD_CONFIRM_MESSAGE"></h3>
   </div>
 </template>
 
 <script>
 import UpdatePasswordComponent from '@/components/UpdatePasswordComponent';
+import config from '../../config/config';
 
 export default {
   name: 'ForgotPasswordComponent',
@@ -32,6 +35,17 @@ export default {
       showUpdatePasswordForm: false,
       showSignInButton: true,
       codeDeliveryDetails: null,
+
+      FORGOT_PASSWORD_COMP: 'forgot-password-component',
+      FORGOT_PASSWORD_COMP_HEADER: 'forgot-password-component-header',
+      FORGOT_PASSWORD_FORM: 'forgot-password-form',
+      FORGOT_PASSWORD_USERNAME: 'forgot-password-username',
+      FORGOT_PASSWORD_EXECUTION_BUTTON: 'forgot-password-execute-button',
+      FORGOT_PASSWORD_MESSAGE: 'forgot-password-message',
+      FORGOT_PASSWORD_CONFIRM_MESSAGE: 'forgot-password-confirm-message',
+
+      SIGN_IN_BUTTON: 'sign-in-view-button',
+      UPDATE_PASSWORD_FORM: 'update-password-form',
     }
   },
 
@@ -44,25 +58,24 @@ export default {
      * @return {Promise<void>}
      */
     async executeForgotPassword() {
-      this.username = document.getElementById('forgot-password-username').value;
+      this.username = document.getElementById(this.FORGOT_PASSWORD_USERNAME).value;
       if (this.username !== '') {
         if (this.$helpers.isValidUserName(this.username)) {
           // set up cognito user
           this.cognitoUser = this.$helpers.buildCognitoUser(this.username);
           await this.forgotPassword();
           await this.$helpers.sleep(2000); // can we do a spinner here
-          if (document.getElementById('forgot-password-confirm-message').textContent === 'Success') {
-            console.log('success content is rendered');
+          if (document.getElementById(this.FORGOT_PASSWORD_CONFIRM_MESSAGE).textContent === config.FORM_SUCCESS_MESSAGES.SUCCESS) {
             this.removeForgotPasswordProperties();
             this.showUpdatePasswordForm = true;
           }
         } else {
           this.clearForgotPasswordInput();
-          document.getElementById('forgot-password-message').innerHTML = 'invalid username';
+          document.getElementById(this.FORGOT_PASSWORD_MESSAGE).innerHTML = config.FORM_ERROR_MESSAGES.INVALID_USERNAME;
         }
       } else {
         this.clearForgotPasswordInput();
-        document.getElementById('forgot-password-message').innerHTML = 'empty username';
+        document.getElementById(this.FORGOT_PASSWORD_MESSAGE).innerHTML = config.FORM_ERROR_MESSAGES.EMPTY_USERNAME;
       }
     },
 
@@ -116,8 +129,8 @@ export default {
      * Clears forgot-password form input values.
      */
     clearForgotPasswordInput() {
-      if (document.getElementById('forgot-password-username').value !== null) {
-        document.getElementById('forgot-password-username').value = '';
+      if (document.getElementById(this.FORGOT_PASSWORD_USERNAME).value !== null) {
+        document.getElementById(this.FORGOT_PASSWORD_USERNAME).value = config.FORM_VALUE.EMPTY;
       }
     },
 
@@ -125,11 +138,10 @@ export default {
      * Removes forgot-password component properties and any text values.
      */
     removeForgotPasswordProperties() {
-      console.log('inside remove-forgot-password-properties');
       this.showForgotPasswordForm = false;
       this.showSignInButton = false;
-      document.getElementById('forgot-password-confirm-message').innerHTML = '';
-      document.getElementById('forgot-password-message').innerHTML = '';
+      document.getElementById(this.FORGOT_PASSWORD_CONFIRM_MESSAGE).innerHTML = config.FORM_VALUE.EMPTY;
+      document.getElementById(this.FORGOT_PASSWORD_MESSAGE).innerHTML = config.FORM_VALUE.EMPTY;
     }
   }
 };

@@ -1,15 +1,16 @@
 <template>
-<div class="confirmRegistration" v-show="showConfirmationRegistrationForm_" id="confirm-registration">
-  <h1 id="verified-header"></h1>
-  <input type="password" class="form-control" id="verificationCode" placeholder="Enter Code">
-  <button type="button" class="verify-button" v-on:click="verifyUser()">Verify</button>
-  <h3 id="verification-message"></h3>
+<div class="confirmRegistration" v-show="showConfirmationRegistrationForm_" :id="CONFIRM_REGISTRATION">
+  <h1 :id="VERIFIED_HEADER"></h1>
+  <input type="password" class="form-control" :id="VERIFICATION_CODE" placeholder="Enter Code">
+  <button type="button" class="verify-button" :id="VERIFICATION_BUTTON" v-on:click="verifyUser()">Verify</button>
+  <h3 :id="VERIFICATION_MESSAGE"></h3>
 </div>
 </template>
 
 <script>
 import { CognitoUser } from 'amazon-cognito-identity-js';
 import Cookies from 'js-cookie';
+import config from '../../config/config';
 
 export default {
   name: 'ConfirmationRegistrationComponent',
@@ -29,6 +30,13 @@ export default {
       verified: false,
       verificationRetry: 0,
       cognitoUserClone: null,
+
+      // id attribute constants as exposed in the confirm-registration-form ^
+      CONFIRM_REGISTRATION: 'confirm-registration',
+      VERIFIED_HEADER: 'verified-header',
+      VERIFICATION_CODE: 'verificationCode',
+      VERIFICATION_MESSAGE: 'verification-message',
+      VERIFICATION_BUTTON: 'verification-button',
     };
   },
   created() {
@@ -49,22 +57,22 @@ export default {
     verifyUser() {
       if (this.verificationRetry < 3) {
         this.verificationRetry += 1;
-        this.verificationCode = document.getElementById('verificationCode').value;
+        this.verificationCode = document.getElementById(this.VERIFICATION_CODE).value;
         if (this.verificationCode !== null) {
           if (this.cognitoUserClone !== null) {
             this.confirmMetroRegistration(this.cognitoUserClone);
           }
         } else {
           // counts as a retry
-          document.getElementById('verification-message').innerHTML = `fail x${this.verificationRetry}`;
+          document.getElementById(this.VERIFICATION_MESSAGE).innerHTML = `${config.FORM_ERROR_MESSAGES.FAIL}${this.verificationRetry}`;
         }
       } else {
         // reached maximum retry, reload to sign in
         window.location.reload();
       }
       // verification did not work so remove any text in input for any further retry
-      if (document.getElementById('verificationCode').value !== null) {
-        document.getElementById('verificationCode').value = '';
+      if (document.getElementById(this.VERIFICATION_CODE).value !== null) {
+        document.getElementById(this.VERIFICATION_CODE).value = config.FORM_VALUE.EMPTY;
       }
 
     },
@@ -75,10 +83,10 @@ export default {
      * @returns {Promise<void>}
      */
     async confirmMetroRegistration(cognitoUser) {
-      document.getElementById('verified-header').innerHTML = 'Enter Verification Code';
+      document.getElementById(this.VERIFIED_HEADER).innerHTML = config.FORM_SUCCESS_MESSAGES.ENTER_CODE;
       cognitoUser.confirmRegistration(this.verificationCode, true, (error, result) => {
         if (error) {
-          document.getElementById('verification-message').innerHTML = `fail x${this.verificationRetry}`;
+          document.getElementById(this.VERIFICATION_MESSAGE).innerHTML = `${config.FORM_ERROR_MESSAGES.FAIL}${this.verificationRetry}`;
         } else {
           this.verified = true;
           this.confirmationResult = result;
@@ -90,7 +98,7 @@ export default {
     },
 
     insertVerificationTextOnMount() {
-      document.getElementById('verified-header').innerHTML = 'Check email for verification code';
+      document.getElementById(this.VERIFIED_HEADER).innerHTML = config.FORM_SUCCESS_MESSAGES.CHECK_EMAIL;
     },
 
     /**

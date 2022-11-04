@@ -3,9 +3,9 @@
     <button v-show="showForgotPasswordButton"
             type="button"
             id="forgot-password-button"
-            v-on:click="loadForgotPasswordForm()">Forgot PW</button>
+            v-on:click="loadForgotPasswordForm()">Forgot Password</button>
 
-    <h1 id="sign-in-default-header" v-show="showSignInForm">Sign In</h1>
+    <h1 id="sign-in-default-header" v-show="showSignInForm">Sign in, eh...</h1>
     <div id="registration-form" v-show="showRegistrationForm">
       <RegisterComponent></RegisterComponent>
     </div>
@@ -19,20 +19,20 @@
       <input type="email" class="form-control" id="sign-in-username" placeholder="User Name">
       <input type="password" class="form-control" id="sign-in-password" placeholder="Password">
       <button type="button" class="sign-in-button" v-on:click="signIn()">Sign In</button>
+      <h3 id="authorized-tag"></h3>
+      <h3 id="unauthorized-reason"></h3>
     </form>
     <div class="buttons">
       <button v-show="showRegisterButton"
               type="button" class="Register"
               id="register-button"
-              v-on:click="loadRegistrationForm()">Register</button>
+              v-on:click="loadRegistrationForm()">Register Account</button>
 
       <button v-show="showResendVerificationButton"
               type="button"
               id="resend-verification-button"
               v-on:click="loadResendVerificationForm()">Resend Code</button>
     </div>
-    <h3 id="authorized-tag"></h3>
-    <h3 id="unauthorized-reason"></h3>
   </div>
 </template>
 
@@ -43,6 +43,7 @@ import RegisterComponent from '@/components/RegisterComponent.vue';
 import ResendVerificationComponent from '@/components/ResendVerificationComponent.vue';
 import ForgotPasswordComponent from '@/components/ForgotPasswordComponent';
 import Cookies from 'js-cookie';
+import config from '../../config/config';
 
 export default {
   name: 'SignInComponent',
@@ -110,7 +111,7 @@ export default {
       // checks for any missing sign-in credential
       if (this.username === '' || this.password === '') {
         this.removeSignInInputValues();
-        document.getElementById('unauthorized-reason').innerHTML = 'oops missed a credential';
+        this.renderErrorMessage(config.FORM_ERROR_MESSAGES.MISSING_VALUE)
         return false;
       } else {
         if (this.$helpers.isValidUserName(this.username)) {
@@ -119,7 +120,7 @@ export default {
         } else {
           // report in valid username
           this.removeSignInInputValues();
-          document.getElementById('unauthorized-reason').innerHTML = 'invalid username';
+          this.renderErrorMessage(config.FORM_ERROR_MESSAGES.INVALID_USERNAME)
         }
       }
       return false;
@@ -155,6 +156,13 @@ export default {
         });
         this.removeSignInInputValues();
       }
+    },
+
+    renderErrorMessage(errorMessage) {
+      document.getElementById('unauthorized-reason').style.color = config.COLOR.LIGHT_RED;
+      document.getElementById('unauthorized-reason').style.fontSize = config.FONT_SIZE.SMALL;
+      document.getElementById('unauthorized-reason').innerHTML = errorMessage;
+      this.clearFormInputValues();
     },
 
     /**
@@ -255,7 +263,7 @@ export default {
     align-items: center;
     height: 50vh;
     width: 40vw;
-    border: 1px solid #8e8d8d;
+    border: 3px solid #8e8d8d;
     box-shadow: 10px 10px #9f9f9f;
     background-color: white;
   }
@@ -264,6 +272,11 @@ export default {
   and this will/should be updated */
   #forgot-password-button {
     background-color: transparent;
+    color: cadetblue;
+    position: relative;
+    top: 20px;
+    left: 185px;
+    width: 8rem;
     background-repeat: no-repeat;
     text-decoration: underline;
     border: none;
@@ -295,6 +308,28 @@ export default {
   }
 
   .buttons > button {
-    width: 6rem;
+    width: 15rem;
+    background-color: transparent;
+    color: cadetblue;
+    top: 15px;
+    left: 185px;
+    background-repeat: no-repeat;
+    text-decoration: underline;
+    border: none;
+    cursor: pointer;
+    outline: none;
   }
+
+  #register-button {
+    position: relative;
+    left: -140px;
+    top: 60px;
+  }
+
+  #resend-verification-button {
+    position: relative;
+    left: 145px;
+    top:60px;
+  }
+
 </style>

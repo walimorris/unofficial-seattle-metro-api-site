@@ -8,10 +8,15 @@ export default {
   FORM_ERROR_MESSAGES: {
     INVALID_USERNAME: 'Invalid Username',
     EMPTY_USERNAME: 'Empty Username',
+    PASSWORD_MISMATCH: 'Passwords do not match',
+    FAIL: 'Fail',
+    MISSING_VALUE: 'Oops, you\'re missing something',
   },
 
   FORM_SUCCESS_MESSAGES: {
     CHECK_EMAIL: 'Check Email for Code',
+    ENTER_CODE: 'Enter Verification Code',
+    SUCCESS: 'Success',
   },
 
   COLOR: {

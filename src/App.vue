@@ -21,7 +21,10 @@ html, body {
   width: 99.8vw;
   margin: 0;
   padding: 0;
-  background-color: #f9f9f9;
+  background-image: url("./assets/vecteezy_one-continuous-single-line-of-famous-building-like-space-needle_8267670.jpg");
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  background-position: 100% 40%;
 }
 
 #app {
