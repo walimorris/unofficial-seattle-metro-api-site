@@ -1,36 +1,36 @@
 <template>
-  <div id="sign-in">
+  <div :id="SIGN_IN_COMPONENT">
     <button v-show="showForgotPasswordButton"
             type="button"
-            id="forgot-password-button"
+            :id="FORGOT_PASSWORD_BUTTON"
             v-on:click="loadForgotPasswordForm()">Forgot Password</button>
 
-    <h1 id="sign-in-default-header" v-show="showSignInForm">Sign in, eh...</h1>
-    <div id="registration-form" v-show="showRegistrationForm">
+    <h1 :id="SIGN_IN_DEFAULT_HEADER" v-show="showSignInForm">Sign in, eh...</h1>
+    <div :id="REGISTRATION_FORM" v-show="showRegistrationForm">
       <RegisterComponent></RegisterComponent>
     </div>
-    <div id="resend-verification-form" v-if="showResendVerificationForm">
+    <div :id="RESEND_VERIFICATION_FORM" v-if="showResendVerificationForm">
       <ResendVerificationComponent></ResendVerificationComponent>
     </div>
-    <div id="forgot-password-form" v-if="showForgotPasswordForm">
+    <div :id="FORGOT_PASSWORD_FORM" v-if="showForgotPasswordForm">
       <ForgotPasswordComponent></ForgotPasswordComponent>
     </div>
-    <form v-show="showSignInForm" id="sign-in-form">
-      <input type="email" class="form-control" id="sign-in-username" placeholder="User Name">
-      <input type="password" class="form-control" id="sign-in-password" placeholder="Password">
-      <button type="button" class="sign-in-button" v-on:click="signIn()">Sign In</button>
-      <h3 id="authorized-tag"></h3>
-      <h3 id="unauthorized-reason"></h3>
+    <form v-show="showSignInForm" :id="SIGN_IN_FORM">
+      <input type="email" class="form-control" :id="SIGN_IN_USERNAME" placeholder="User Name">
+      <input type="password" class="form-control" :id="SIGN_IN_PASSWORD" placeholder="Password">
+      <button type="button" class="sign-in-button" :id="SIGN_IN_BUTTON" v-on:click="signIn()">Sign In</button>
+      <h3 :id="AUTHORIZED_TAG"></h3>
+      <h3 :id="UNAUTHORIZED_REASON"></h3>
     </form>
     <div class="buttons">
       <button v-show="showRegisterButton"
               type="button" class="Register"
-              id="register-button"
+              :id="REGISTER_BUTTON"
               v-on:click="loadRegistrationForm()">Register Account</button>
 
       <button v-show="showResendVerificationButton"
               type="button"
-              id="resend-verification-button"
+              :id="RESEND_VERIFICATION_BUTTON"
               v-on:click="loadResendVerificationForm()">Resend Code</button>
     </div>
   </div>
@@ -66,6 +66,21 @@ export default {
       basicRegisteredCookie: null,
       basicVerifiedCookieSet: null,
       basicVerifiedCookie: null,
+
+      SIGN_IN_COMPONENT: 'sign-in',
+      FORGOT_PASSWORD_BUTTON: 'forgot-password-button',
+      SIGN_IN_DEFAULT_HEADER: 'sign-in-default-header',
+      REGISTRATION_FORM: 'registration-form',
+      RESEND_VERIFICATION_FORM: 'resend-verification-form',
+      FORGOT_PASSWORD_FORM: 'forgot-password-form',
+      SIGN_IN_FORM: 'sign-in-form',
+      SIGN_IN_USERNAME: 'sign-in-username',
+      SIGN_IN_PASSWORD: 'sign-in-password',
+      AUTHORIZED_TAG: 'authorized-tag',
+      UNAUTHORIZED_REASON: 'unauthorized-reason',
+      SIGN_IN_BUTTON: 'sign-in-button',
+      REGISTER_BUTTON: 'register-button',
+      RESEND_VERIFICATION_BUTTON: 'resend-verification-button',
     };
   },
 
@@ -90,6 +105,7 @@ export default {
      */
     signIn() {
       this.toggleAuthorizedTagOff();
+      this.removeInputBorderStyle();
       if (this.collectAuthenticationData()) {
         this.cognitoUser = this.$helpers.buildCognitoUser(this.username);
         const authenticationDetails = new CognitoIdentityServiceProvider
@@ -105,8 +121,8 @@ export default {
      * @return {boolean} collected username and password returns true and false otherwise
      */
     collectAuthenticationData() {
-      this.username = document.getElementById('sign-in-username').value;
-      this.password = document.getElementById('sign-in-password').value;
+      this.username = document.getElementById(this.SIGN_IN_USERNAME).value;
+      this.password = document.getElementById(this.SIGN_IN_USERNAME).value;
 
       // checks for any missing sign-in credential
       if (this.username === '' || this.password === '') {
@@ -158,10 +174,23 @@ export default {
       }
     },
 
+    /**
+     * Renders error message, updates form input border style, font size and font color.
+     *
+     * @param errorMessage error message to render
+     */
     renderErrorMessage(errorMessage) {
-      document.getElementById('unauthorized-reason').style.color = config.COLOR.LIGHT_RED;
-      document.getElementById('unauthorized-reason').style.fontSize = config.FONT_SIZE.SMALL;
-      document.getElementById('unauthorized-reason').innerHTML = errorMessage;
+      document.getElementById(this.UNAUTHORIZED_REASON).style.color = config.COLOR.LIGHT_RED;
+      document.getElementById(this.UNAUTHORIZED_REASON).style.fontSize = config.FONT_SIZE.SMALL;
+      document.getElementById(this.UNAUTHORIZED_REASON).innerHTML = errorMessage;
+      if (errorMessage.includes(config.FORM_ERROR_MESSAGES.MISSING_VALUE)) {
+        document.getElementById(this.SIGN_IN_USERNAME).style.borderColor = config.COLOR.LIGHT_RED;
+        document.getElementById(this.SIGN_IN_PASSWORD).style.borderColor = config.COLOR.LIGHT_RED;
+      } else {
+        if (errorMessage.includes(config.FORM_ERROR_MESSAGES.INVALID_USERNAME)) {
+          document.getElementById(this.SIGN_IN_USERNAME).style.borderColor = config.COLOR.LIGHT_RED;
+        }
+      }
       this.clearFormInputValues();
     },
 
@@ -170,6 +199,7 @@ export default {
      * attributes or text.
      */
     loadRegistrationForm() {
+      this.removeInputBorderStyle();
       this.removeSignInFeatures();
       this.showRegistrationForm = true;
     },
@@ -179,6 +209,7 @@ export default {
      * attributes or text.
      */
     loadResendVerificationForm() {
+      this.removeInputBorderStyle();
       this.removeSignInFeatures();
       this.showResendVerificationForm = true;
     },
@@ -188,6 +219,7 @@ export default {
      * in attributes or text.
      */
     loadForgotPasswordForm() {
+      this.removeInputBorderStyle();
       this.removeSignInFeatures();
       this.showForgotPasswordForm = true;
     },
@@ -206,28 +238,44 @@ export default {
     },
 
     /**
+     * Clears Sign in form input values.
+     */
+    clearFormInputValues() {
+      document.getElementById(this.SIGN_IN_USERNAME).value = config.FORM_VALUE.EMPTY;
+      document.getElementById(this.SIGN_IN_PASSWORD).value = config.FORM_VALUE.EMPTY;
+    },
+
+    /**
      * Clears sign-in username and password input values.
      */
     removeSignInInputValues() {
-      document.getElementById('sign-in-username').value = '';
-      document.getElementById('sign-in-password').value = '';
+      document.getElementById(this.SIGN_IN_USERNAME).value = '';
+      document.getElementById(this.SIGN_IN_PASSWORD).value = '';
     },
 
     /**
      * Clears unauthorized-reason element of any text content.
      */
     toggleUnAuthorizedReasonOff() {
-      if (document.getElementById('unauthorized-reason').innerHTML !== null) {
-        document.getElementById('unauthorized-reason').innerHTML = '';
+      if (document.getElementById(this.UNAUTHORIZED_REASON).innerHTML !== null) {
+        document.getElementById(this.UNAUTHORIZED_REASON).innerHTML = '';
       }
+    },
+
+    /**
+     * Removes form input values border styling.
+     */
+    removeInputBorderStyle() {
+      document.getElementById(this.SIGN_IN_USERNAME).style.borderColor = config.COLOR.BLACK;
+      document.getElementById(this.SIGN_IN_PASSWORD).style.borderColor = config.COLOR.BLACK;
     },
 
     /**
      * Clears authorized-tag element of any text content.
      */
     toggleAuthorizedTagOff() {
-      if (document.getElementById('authorized-tag').innerHTML !== null) {
-        document.getElementById('authorized-tag').innerHTML = '';
+      if (document.getElementById(this.AUTHORIZED_TAG).innerHTML !== null) {
+        document.getElementById(this.AUTHORIZED_TAG).innerHTML = '';
       }
     },
 
@@ -249,7 +297,7 @@ export default {
      */
     getBasicVerifiedCookieIfExists() {
       return Cookies.get('_Secure-BasicVerifiedCookie');
-    }
+    },
   },
 };
 
@@ -258,30 +306,15 @@ export default {
 <style>
   #sign-in {
     display: flex;
+    margin: auto;
+    height: auto;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    height: 50vh;
     width: 40vw;
     border: 3px solid #8e8d8d;
     box-shadow: 10px 10px #9f9f9f;
     background-color: white;
-  }
-
-  /* added for poc styling for forgot-password button
-  and this will/should be updated */
-  #forgot-password-button {
-    background-color: transparent;
-    color: cadetblue;
-    position: relative;
-    top: 20px;
-    left: 185px;
-    width: 8rem;
-    background-repeat: no-repeat;
-    text-decoration: underline;
-    border: none;
-    cursor: pointer;
-    outline: none;
   }
 
   h1 {
@@ -322,14 +355,29 @@ export default {
 
   #register-button {
     position: relative;
-    left: -140px;
-    top: -15px;
+    left: -9rem;
+    top: .02rem;
   }
 
   #resend-verification-button {
     position: relative;
-    left: 145px;
-    top:-15px;
+    left: 9rem;
+    top: .02rem;
+  }
+
+  /* added for poc styling for forgot-password button
+  and this will/should be updated */
+  #forgot-password-button {
+    background-color: transparent;
+    color: cadetblue;
+    top: 1rem;
+    left: 12rem;
+    width: 8rem;
+    background-repeat: no-repeat;
+    text-decoration: underline;
+    border: none;
+    cursor: pointer;
+    outline: none;
   }
 
 </style>
