@@ -21,7 +21,7 @@ describe('SignInComponent.vue', () => {
   it('renders sign-in form header when user lands on sign in view', () => {
     const wrapper = mount(SignInComponent);
     const signInDefaultHeader = wrapper.find('#sign-in-default-header');
-    expect(signInDefaultHeader.text()).toBe('Sign in, eh...');
+    expect(signInDefaultHeader.text()).toBe('Sign in to your account');
     expect(signInDefaultHeader.isVisible()).toBe(true);
   });
 

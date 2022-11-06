@@ -121,7 +121,8 @@ export default {
         return errorMessage += `${config.FORM_ERROR_MESSAGES.MISSING_VALUE}`;
       }
       if (!this.$helpers.isValidUserName(username)) {
-        errorMessage += `${config.FORM_ERROR_MESSAGES.INVALID_USERNAME}`;
+        errorMessage += this.$helpers.addNonBreakingSpace(6) +
+          `${config.FORM_ERROR_MESSAGES.INVALID_USERNAME}`;
       }
       if (password !== passwordConfirmation) {
         errorMessage += `<br/>${config.FORM_ERROR_MESSAGES.PASSWORD_MISMATCH}`;

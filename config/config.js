@@ -30,5 +30,9 @@ export default {
 
   FORM_VALUE: {
     EMPTY: ''
-  }
+  },
+
+  EVENT: {
+    CLICK: 'click'
+  },
 };

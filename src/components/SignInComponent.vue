@@ -1,11 +1,6 @@
 <template>
   <div :id="SIGN_IN_COMPONENT">
-    <button v-show="showForgotPasswordButton"
-            type="button"
-            :id="FORGOT_PASSWORD_BUTTON"
-            v-on:click="loadForgotPasswordForm()">Forgot Password</button>
-
-    <h1 :id="SIGN_IN_DEFAULT_HEADER" v-show="showSignInForm">Sign in, eh...</h1>
+    <h2 :id="SIGN_IN_DEFAULT_HEADER" v-show="showSignInForm">Sign in to your account</h2>
     <div :id="REGISTRATION_FORM" v-show="showRegistrationForm">
       <RegisterComponent></RegisterComponent>
     </div>
@@ -18,21 +13,13 @@
     <form v-show="showSignInForm" :id="SIGN_IN_FORM">
       <input type="email" class="form-control" :id="SIGN_IN_USERNAME" placeholder="User Name">
       <input type="password" class="form-control" :id="SIGN_IN_PASSWORD" placeholder="Password">
-      <button type="button" class="sign-in-button" :id="SIGN_IN_BUTTON" v-on:click="signIn()">Sign In</button>
+      <p v-show="showForgotPasswordButton" :id="FORGOT_PASSWORD_TAG">Forgot password? <a :id="FORGOT_PASSWORD_BUTTON" href="#">Reset here</a></p>
+      <button type="button" class="sign-in-button" :id="SIGN_IN_BUTTON" v-on:click="signIn()">Get started</button>
+      <p :id="REGISTER_TAG">Not Registered? <a :id="REGISTER_BUTTON" href="#">Register an account</a></p>
       <h3 :id="AUTHORIZED_TAG"></h3>
       <h3 :id="UNAUTHORIZED_REASON"></h3>
     </form>
-    <div class="buttons">
-      <button v-show="showRegisterButton"
-              type="button" class="Register"
-              :id="REGISTER_BUTTON"
-              v-on:click="loadRegistrationForm()">Register Account</button>
-
-      <button v-show="showResendVerificationButton"
-              type="button"
-              :id="RESEND_VERIFICATION_BUTTON"
-              v-on:click="loadResendVerificationForm()">Resend Code</button>
-    </div>
+    <p v-show="showRegisterButton" :id="RESEND_VERIFICATION_TAG">Failed confirmation? <a :id="RESEND_VERIFICATION_BUTTON" href="#">Resend code</a></p>
   </div>
 </template>
 
@@ -69,6 +56,7 @@ export default {
 
       SIGN_IN_COMPONENT: 'sign-in',
       FORGOT_PASSWORD_BUTTON: 'forgot-password-button',
+      FORGOT_PASSWORD_TAG: 'forgot-password-tag',
       SIGN_IN_DEFAULT_HEADER: 'sign-in-default-header',
       REGISTRATION_FORM: 'registration-form',
       RESEND_VERIFICATION_FORM: 'resend-verification-form',
@@ -80,8 +68,35 @@ export default {
       UNAUTHORIZED_REASON: 'unauthorized-reason',
       SIGN_IN_BUTTON: 'sign-in-button',
       REGISTER_BUTTON: 'register-button',
+      REGISTER_TAG: 'register-tag',
+      RESEND_VERIFICATION_TAG: 'resend-verification-tag',
       RESEND_VERIFICATION_BUTTON: 'resend-verification-button',
     };
+  },
+
+  mounted() {
+    const registerElement = document.getElementById(this.REGISTER_BUTTON);
+    const forgotPasswordElement = document.getElementById(this.FORGOT_PASSWORD_BUTTON);
+    const resendElement = document.getElementById(this.RESEND_VERIFICATION_BUTTON);
+
+    // add if statement to ensure button exists before calling
+    if (registerElement) {
+      registerElement.addEventListener(config.EVENT.CLICK, () => {
+        this.loadRegistrationForm();
+      });
+    }
+
+    if (forgotPasswordElement) {
+      forgotPasswordElement.addEventListener(config.EVENT.CLICK, () => {
+        this.loadForgotPasswordForm();
+      });
+    }
+
+    if (resendElement) {
+      resendElement.addEventListener(config.EVENT.CLICK, () => {
+        this.loadResendVerificationForm();
+      });
+    }
   },
 
   created() {
@@ -317,7 +332,7 @@ export default {
     background-color: white;
   }
 
-  h1 {
+  h2 {
     padding-bottom: .8rem;
   }
 
@@ -329,55 +344,91 @@ export default {
   }
 
   input {
-    margin-bottom: 1rem;
+    margin-bottom: 2rem;
+  }
+
+  .form-control {
+    border: 0;
+    padding: 0;
+    z-index: 1;
+    background-color: transparent;
+    border-bottom: 1px solid #d3d3d3;
+    font: inherit;
+    width: 95%;
+    font-size: 14px;
+    line-height: 30px;
+    border-bottom-color: #665856;
+    color: #665856;
+  }
+
+  .form-control:focus {
+    outline: 0;
+    border-bottom: 2px solid #665856;
+  }
+
+  .form-control::placeholder {
+    color: #8597a3;
+    top: 20px;
+  }
+
+  .form-control:focus::placeholder {
+    font-weight: bold;
   }
 
   .sign-in-button {
-    margin-bottom: .8rem;
-  }
-
-  .buttons {
-    width: 15rem;
-  }
-
-  .buttons > button {
-    width: 15rem;
-    background-color: transparent;
-    color: cadetblue;
-    top: 15px;
-    left: 185px;
-    background-repeat: no-repeat;
-    text-decoration: underline;
+    background: linear-gradient(#ff6100, rgba(255, 80, 80, 1));
+    animation: btn 6.0s 3s infinite ease-in-out;
+    transition: all 0.3s;
+    border-radius: 4px;
     border: none;
-    cursor: pointer;
     outline: none;
+    margin-top: 2rem;
+    width: 100%;
+    height: 35px;
+    font-size: 15px;
+    font-weight: 500;
+    color: #fff;
+  }
+
+  .sign-in-button:hover {
+    opacity: 2;
+    box-shadow: 0 2px 2px -3px #ff6100;
+  }
+
+  #sign-in-password {
+    margin-bottom: 0;
   }
 
   #register-button {
-    position: relative;
-    left: -9rem;
-    top: .02rem;
+    font-size: 14px;
+  }
+
+  #register-tag {
+    font-size: 14px;
+  }
+
+  #resend-verification-tag {
+    font-size: 12px;
   }
 
   #resend-verification-button {
-    position: relative;
-    left: 9rem;
-    top: .02rem;
+    font-size: 12px;
   }
 
-  /* added for poc styling for forgot-password button
-  and this will/should be updated */
+  #resend-verification-button:hover {
+    font-weight: bold;
+  }
+
+  #forgot-password-tag {
+    font-size: 12px;
+  }
+
   #forgot-password-button {
-    background-color: transparent;
-    color: cadetblue;
-    top: 1rem;
-    left: 12rem;
-    width: 8rem;
-    background-repeat: no-repeat;
-    text-decoration: underline;
-    border: none;
-    cursor: pointer;
-    outline: none;
+    font-size: 12px;
+  }
+
+  #forgot-password-button:hover {
+    font-weight: bold;
   }
 
 </style>

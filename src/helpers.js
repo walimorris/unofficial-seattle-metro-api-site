@@ -31,6 +31,14 @@ const generateRandomId = (length) => {
   return result;
 };
 
+const addNonBreakingSpace = (spaces) => {
+  let space = '';
+  for (let i = 0; i < spaces; i++) {
+    space += '&nbsp';
+  }
+  return space;
+}
+
 /**
  * Conducts a timeout in milliseconds.
  * @param ms time in ms
@@ -107,5 +115,5 @@ const buildCognitoUser = (username) => {
 
 export default {
   isValidUserName, buildCognitoUser, generateRandomId, collectUserPoolData, collectUserData,
-  getUserPool, getCognitoAttributePersonalName, getCognitoAttributeEmail, sleep
+  getUserPool, getCognitoAttributePersonalName, getCognitoAttributeEmail, sleep, addNonBreakingSpace
 };
