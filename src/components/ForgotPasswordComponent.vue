@@ -48,9 +48,12 @@ export default {
 
   mounted() {
     const signInButton = document.getElementById(this.SIGN_IN_BUTTON);
-    signInButton.addEventListener('click', () => {
-      this.loadSignInForm();
-    });
+
+    if (signInButton) {
+      signInButton.addEventListener('click', () => {
+        this.loadSignInForm();
+      });
+    }
   },
 
   methods: {

@@ -14,6 +14,8 @@ phases:
     commands:
       - echo Build Phase
       - npm run build
+      - echo Running Unit tests
+      - npm run test:unit
   post_build:
     commands:
       - echo PostBuild Phase
