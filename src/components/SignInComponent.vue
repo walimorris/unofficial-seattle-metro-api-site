@@ -20,21 +20,25 @@
       <h3 :id="UNAUTHORIZED_REASON"></h3>
     </form>
     <p v-show="showRegisterButton" :id="RESEND_VERIFICATION_TAG">Failed confirmation? <a :id="RESEND_VERIFICATION_BUTTON" href="#">Resend code</a></p>
+    <div :id="UNDER_CONSTRUCTION_COMPONENT" v-if="showUnderConstructionComponent">
+      <UnderConstructionComponent></UnderConstructionComponent>
+    </div>
   </div>
 </template>
 
 <script>
 
-import * as CognitoIdentityServiceProvider from 'amazon-cognito-identity-js';
 import RegisterComponent from '@/components/RegisterComponent.vue';
 import ResendVerificationComponent from '@/components/ResendVerificationComponent.vue';
 import ForgotPasswordComponent from '@/components/ForgotPasswordComponent';
+import UnderConstructionComponent from '@/components/UnderConstructionComponent';
+import * as CognitoIdentityServiceProvider from 'amazon-cognito-identity-js';
 import Cookies from 'js-cookie';
 import config from '../../config/config';
 
 export default {
   name: 'SignInComponent',
-  components: { ForgotPasswordComponent, RegisterComponent, ResendVerificationComponent },
+  components: { UnderConstructionComponent, ForgotPasswordComponent, RegisterComponent, ResendVerificationComponent },
   data() {
     return {
       username: null,
@@ -49,6 +53,7 @@ export default {
       showResendVerificationButton: true,
       showForgotPasswordForm: false,
       showForgotPasswordButton: true,
+      showUnderConstructionComponent: false,
       basicRegisteredCookieSet: null,
       basicRegisteredCookie: null,
       basicVerifiedCookieSet: null,
@@ -71,6 +76,7 @@ export default {
       REGISTER_TAG: 'register-tag',
       RESEND_VERIFICATION_TAG: 'resend-verification-tag',
       RESEND_VERIFICATION_BUTTON: 'resend-verification-button',
+      UNDER_CONSTRUCTION_COMPONENT: 'under-construction-component',
     };
   },
 
@@ -118,7 +124,7 @@ export default {
      *
      * @see CognitoIdentityServiceProvider
      */
-    signIn() {
+    async signIn() {
       this.toggleAuthorizedTagOff();
       this.removeInputBorderStyle();
       if (this.collectAuthenticationData()) {
@@ -126,7 +132,12 @@ export default {
         const authenticationDetails = new CognitoIdentityServiceProvider
           .AuthenticationDetails(this.authenticationData);
 
-        this.authenticateUser(authenticationDetails);
+        await this.authenticateUser(authenticationDetails);
+        await this.$helpers.sleep(2000);
+        if (document.getElementById('authorized-tag').innerHTML === '*Authorized*') {
+          // remove any sign-in elements and show under-construction component
+          this.loadUnderConstructionComponent();
+        }
       }
     },
 
@@ -137,7 +148,7 @@ export default {
      */
     collectAuthenticationData() {
       this.username = document.getElementById(this.SIGN_IN_USERNAME).value;
-      this.password = document.getElementById(this.SIGN_IN_USERNAME).value;
+      this.password = document.getElementById(this.SIGN_IN_PASSWORD).value;
 
       // checks for any missing sign-in credential
       if (this.username === '' || this.password === '') {
@@ -237,6 +248,14 @@ export default {
       this.removeInputBorderStyle();
       this.removeSignInFeatures();
       this.showForgotPasswordForm = true;
+    },
+
+    loadUnderConstructionComponent() {
+      this.removeInputBorderStyle();
+      this.removeSignInFeatures();
+      // remove form box and shadow
+      document.getElementById('sign-in').style.all = 'unset';
+      this.showUnderConstructionComponent = true;
     },
 
     /**
