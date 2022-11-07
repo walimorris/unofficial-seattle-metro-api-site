@@ -1,22 +1,18 @@
 <template>
   <div :id="FORGOT_PASSWORD_COMP">
-    <h1 :id="FORGOT_PASSWORD_COMP_HEADER" v-show="showForgotPasswordForm">Forgot Password</h1>
+    <h2 :id="FORGOT_PASSWORD_COMP_HEADER" v-show="showForgotPasswordForm">Forgot Password</h2>
     <div :id="UPDATE_PASSWORD_FORM" v-if="showUpdatePasswordForm">
       <UpdatePasswordComponent></UpdatePasswordComponent>
     </div>
     <form v-show="showForgotPasswordForm" :id="FORGOT_PASSWORD_FORM">
-      <input type="email" id="forgot-password-username" placeholder="username">
+      <input class="form-control" type="email" id="forgot-password-username" placeholder="username">
       <h3 :id="FORGOT_PASSWORD_MESSAGE"></h3>
       <button type="button"
               :id="FORGOT_PASSWORD_EXECUTION_BUTTON"
               v-on:click="executeForgotPassword()">Submit</button>
+      <p :id="SIGN_IN_BUTTON_TAG">Change your mind? <a :id="SIGN_IN_BUTTON" href="#">Sign in</a></p>
     </form>
-    <div>
-      <button v-show="showSignInButton"
-              type="button"
-              :id="SIGN_IN_BUTTON" v-on:click="loadSignInForm()">Sign In</button>
-    </div>
-    <h3 :id="FORGOT_PASSWORD_CONFIRM_MESSAGE"></h3>
+    <h2 :id="FORGOT_PASSWORD_CONFIRM_MESSAGE"></h2>
   </div>
 </template>
 
@@ -45,8 +41,16 @@ export default {
       FORGOT_PASSWORD_CONFIRM_MESSAGE: 'forgot-password-confirm-message',
 
       SIGN_IN_BUTTON: 'sign-in-view-button',
+      SIGN_IN_BUTTON_TAG: 'sign-in-button-tag',
       UPDATE_PASSWORD_FORM: 'update-password-form',
     }
+  },
+
+  mounted() {
+    const signInButton = document.getElementById(this.SIGN_IN_BUTTON);
+    signInButton.addEventListener('click', () => {
+      this.loadSignInForm();
+    });
   },
 
   methods: {
@@ -70,12 +74,10 @@ export default {
             this.showUpdatePasswordForm = true;
           }
         } else {
-          this.clearForgotPasswordInput();
-          document.getElementById(this.FORGOT_PASSWORD_MESSAGE).innerHTML = config.FORM_ERROR_MESSAGES.INVALID_USERNAME;
+          this.renderErrorMessage(config.FORM_ERROR_MESSAGES.INVALID_USERNAME)
         }
       } else {
-        this.clearForgotPasswordInput();
-        document.getElementById(this.FORGOT_PASSWORD_MESSAGE).innerHTML = config.FORM_ERROR_MESSAGES.EMPTY_USERNAME;
+        this.renderErrorMessage(config.FORM_ERROR_MESSAGES.EMPTY_USERNAME)
       }
     },
 
@@ -100,6 +102,7 @@ export default {
             }
             if (forgotPasswordConfirmMessage !== null) {
               forgotPasswordMessage.textContent = ''
+              forgotPasswordMessage.style.color = config.COLOR.BLACK;
               forgotPasswordConfirmMessage.textContent = 'Success';
             }
             this.codeDeliveryDetails = result;
@@ -112,6 +115,8 @@ export default {
             }
             if (forgotPasswordMessage !== null) {
               forgotPasswordMessage.textContent = error.message;
+              forgotPasswordMessage.style.color = config.COLOR.LIGHT_RED;
+              forgotPasswordMessage.style.fontSize = config.FONT_SIZE.SMALL;
             }
           },
         });
@@ -142,6 +147,13 @@ export default {
       this.showSignInButton = false;
       document.getElementById(this.FORGOT_PASSWORD_CONFIRM_MESSAGE).innerHTML = config.FORM_VALUE.EMPTY;
       document.getElementById(this.FORGOT_PASSWORD_MESSAGE).innerHTML = config.FORM_VALUE.EMPTY;
+    },
+
+    renderErrorMessage(message) {
+      this.clearForgotPasswordInput();
+      document.getElementById(this.FORGOT_PASSWORD_MESSAGE).innerHTML = message;
+      document.getElementById(this.FORGOT_PASSWORD_MESSAGE).style.color = config.COLOR.LIGHT_RED;
+      document.getElementById(this.FORGOT_PASSWORD_MESSAGE).style.fontSize = config.FONT_SIZE.SMALL;
     }
   }
 };
@@ -149,5 +161,50 @@ export default {
 </script>
 
 <style>
+
+#forgot-password-component {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  width: 100%;
+}
+
+#forgot-password-form {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+#forgot-password-execute-button {
+  background: linear-gradient(#ff6100, rgba(255, 80, 80, 1));
+  animation: btn 6.0s 3s infinite ease-in-out;
+  transition: all 0.3s;
+  border-radius: 4px;
+  border: none;
+  outline: none;
+  width: 100%;
+  height: 35px;
+  font-size: 15px;
+  font-weight: 500;
+  color: #fff;
+}
+
+#forgot-password-execute-button:hover {
+  opacity: 2;
+  cursor: pointer;
+  box-shadow: 0 2px 2px -3px #ff6100;
+}
+
+#sign-in-button-tag {
+  font-size: 14px;
+}
+
+#forgot-password-username {
+  margin-bottom: .01rem;
+  width: 100%;
+}
 
 </style>

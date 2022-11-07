@@ -411,6 +411,7 @@ export default {
 
   .sign-in-button:hover {
     opacity: 2;
+    cursor: pointer;
     box-shadow: 0 2px 2px -3px #ff6100;
   }
 

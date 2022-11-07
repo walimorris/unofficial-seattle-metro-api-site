@@ -2,7 +2,7 @@
 <div class="confirmRegistration" v-show="showConfirmationRegistrationForm_" :id="CONFIRM_REGISTRATION">
   <h1 :id="VERIFIED_HEADER"></h1>
   <input type="password" class="form-control" :id="VERIFICATION_CODE" placeholder="Enter Code">
-  <button type="button" class="verify-button" :id="VERIFICATION_BUTTON" v-on:click="verifyUser()">Verify</button>
+  <button type="button" class="verification-button" :id="VERIFICATION_BUTTON" v-on:click="verifyUser()">Verify</button>
   <h3 :id="VERIFICATION_MESSAGE"></h3>
 </div>
 </template>
@@ -86,7 +86,9 @@ export default {
       document.getElementById(this.VERIFIED_HEADER).innerHTML = config.FORM_SUCCESS_MESSAGES.ENTER_CODE;
       cognitoUser.confirmRegistration(this.verificationCode, true, (error, result) => {
         if (error) {
-          document.getElementById(this.VERIFICATION_MESSAGE).innerHTML = `${config.FORM_ERROR_MESSAGES.FAIL}${this.verificationRetry}`;
+          document.getElementById(this.VERIFICATION_MESSAGE).style.color = config.COLOR.LIGHT_RED;
+          document.getElementById(this.VERIFICATION_MESSAGE).style.fontSize = config.FONT_SIZE.SMALL;
+          document.getElementById(this.VERIFICATION_MESSAGE).innerHTML = `${config.FORM_ERROR_MESSAGES.FAIL} x${this.verificationRetry}`;
         } else {
           this.verified = true;
           this.confirmationResult = result;
@@ -129,6 +131,33 @@ export default {
 </script>
 
 <style>
-.confirmRegistration {
+
+#confirm-registration {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  width: 100%;
 }
+
+#verificationCode {
+  margin-bottom: 2rem;
+  width: 70%;
+}
+
+.verification-button {
+  background: linear-gradient(#ff6100, rgba(255, 80, 80, 1));
+  animation: btn 6.0s 3s infinite ease-in-out;
+  transition: all 0.3s;
+  border-radius: 4px;
+  border: none;
+  outline: none;
+  width: 70%;
+  height: 35px;
+  font-size: 15px;
+  font-weight: 500;
+  color: #fff;
+}
+
 </style>

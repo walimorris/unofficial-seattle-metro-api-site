@@ -1,18 +1,17 @@
 <template>
   <div :id="RESEND_VERIFICATION">
-    <h1 v-show="showResendVerificationCodeForm" :id="RESEND_VERIFICATION_HEADER">Resend Verification Form</h1>
+    <h1 v-show="showResendVerificationCodeForm" :id="RESEND_VERIFICATION_HEADER">Resend Verification</h1>
     <form v-show="showResendVerificationCodeForm" :id="RESEND_VERIFICATION_FORM">
       <input type="email" class="form-control" :id="USER_NAME " placeholder="email">
       <p :id="RESEND_VERIFICATION_MESSAGE"></p>
       <button type="button" class="verify-button"
               :id="RESEND_VERIFICATION_BUTTON"
               v-on:click="resendVerificationCode()">Send Code</button>
+      <p v-show="showSignInButton"
+         :id="SIGN_IN_BUTTON_TAG">Change your mind?
+        <a :id="LOAD_SIGN_IN_BUTTON" href="#">Sign in</a>
+      </p>
     </form>
-    <button v-show="showSignInButton"
-            :id="LOAD_SIGN_IN_BUTTON"
-            type="button"
-            class="load-sign-in-button"
-            v-on:click="loadSignInForm()">Sign in</button>
     <div :id="VIEW_TO_CONFIRMATION_REG_FORM" v-if="showConfirmationRegistrationForm">
       <confirmation-registration-component :username="username"
                                            :cognitoUser="cognitoUser"
@@ -48,8 +47,16 @@ export default {
       RESEND_VERIFICATION_HEADER: 'resend-verification-header',
       RESEND_VERIFICATION_BUTTON: 'resend-verification-button',
       LOAD_SIGN_IN_BUTTON: 'load-sign-button',
+      SIGN_IN_BUTTON_TAG: 'sign-in-button-tag',
       VIEW_TO_CONFIRMATION_REG_FORM: 'view-to-confirmation-registration-form',
     };
+  },
+
+  mounted() {
+    const signInElement = document.getElementById(this.LOAD_SIGN_IN_BUTTON);
+    signInElement.addEventListener('click', () => {
+      this.loadSignInForm();
+    });
   },
 
   methods: {
@@ -138,5 +145,46 @@ export default {
 </script>
 
 <style>
+
+#resend-verification {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  width: 100%;
+}
+
+#resend-verification-form {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.verify-button {
+  background: linear-gradient(#ff6100, rgba(255, 80, 80, 1));
+  animation: btn 6.0s 3s infinite ease-in-out;
+  transition: all 0.3s;
+  border-radius: 4px;
+  border: none;
+  outline: none;
+  width: 100%;
+  height: 35px;
+  font-size: 15px;
+  font-weight: 500;
+  color: #fff;
+}
+
+.verify-button:hover {
+  opacity: 2;
+  cursor: pointer;
+  box-shadow: 0 2px 2px -3px #ff6100;
+}
+
+#user-email {
+  margin-bottom: .01rem;
+  width: 100%;
+}
 
 </style>
