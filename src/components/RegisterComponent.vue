@@ -1,8 +1,8 @@
 <template>
   <div class="unofficial-seattle-metro-spa" :id="REGISTER_COMPONENT_SPA">
-    <h1 v-if="showRegistrationForm" class="register-component-title"
+    <h2 v-if="showRegistrationForm" class="register-component-title"
         :id="REGISTER_TITLE_HEADER">Register an Account
-    </h1>
+    </h2>
     <form v-if="showRegistrationForm" :id="REGISTER_FORM">
       <input type="text" class="form-control" :id="PERSONAL_NAME_REGISTER" placeholder="Name">
       <input type="email" class="form-control" :id="EMAIL_INPUT_REGISTER" placeholder="Email">
@@ -11,7 +11,7 @@
       <h3 v-show="showErrorMessage" :id="REGISTER_ERROR_MESSAGE"></h3>
       <div class="buttons">
         <button type="button" class="register-button" v-on:click="registerUser()">Register</button>
-        <button type="button" class="load-sign-in-button" v-on:click="loadSignInForm()">Sign in</button>
+        <p :id="LOAD_SIGN_IN_TAG">Already have an account? <a :id="LOAD_SIGN_IN_BUTTON" href="#">Sign in</a></p>
       </div>
     </form>
     <div v-if="showConfirmationRegistrationForm">
@@ -54,7 +54,17 @@ export default {
       PASSWORD_INPUT_REGISTER: 'passwordInputRegister',
       CONFIRM_PASSWORD: 'confirmpass',
       REGISTER_ERROR_MESSAGE: 'registration-error-message',
+      LOAD_SIGN_IN_BUTTON: 'load-sign-in-button',
+      LOAD_SIGN_IN_TAG: 'load-sign-in-tag',
     };
+  },
+
+  mounted() {
+
+    const signInElement = document.getElementById(this.LOAD_SIGN_IN_BUTTON);
+    signInElement.addEventListener('click', () => {
+      this.loadSignInForm();
+    });
   },
 
   methods: {
@@ -212,25 +222,28 @@ export default {
     margin-bottom: .8rem;
   }
 
-  .buttons {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    height: 2rem;
-    width: 11rem;
+  .register-button {
+    background: linear-gradient(#ff6100, rgba(255, 80, 80, 1));
+    animation: btn 6.0s 3s infinite ease-in-out;
+    transition: all 0.3s;
+    border-radius: 4px;
+    border: none;
+    outline: none;
+    margin-top: 2rem;
+    width: 100%;
+    height: 35px;
+    font-size: 15px;
+    font-weight: 500;
+    color: #fff;
   }
 
-  button {
-    background-color: white;
-    height: 1.5rem;
-    width: 5rem;
-    border: 1px solid gray;
-    border-radius: 3px;
-  }
-
-  button:hover {
+  .register-button:hover {
+    opacity: 2;
     cursor: pointer;
-    color: white;
-    background-color: #939292;
+    box-shadow: 0 2px 2px -3px #ff6100;
+  }
+
+  #load-sign-in-tag {
+    font-size: 14px;
   }
 </style>
