@@ -10,8 +10,16 @@
 
 <script>
 
+import { CognitoUser } from 'amazon-cognito-identity-js';
+
 export default {
   name: 'UnderConstructionComponent',
+  props: {
+    username: { String },
+    cognitoUser: { CognitoUser },
+    cognitoResult: { Object },
+    cachedCognitoSession: { Object },
+  },
   data() {
     return {
 
@@ -23,10 +31,9 @@ export default {
   },
 
   mounted() {
-    // sends a message to user that verifies they want to exit the under construction page.
-    // window.onbeforeunload = function (event) {
-    //   return event.preventDefault();
-    // }
+    if (this.cachedCognitoSession !== null) {
+      document.getElementById('sign-in').style.all = 'unset';
+    }
   },
 }
 
