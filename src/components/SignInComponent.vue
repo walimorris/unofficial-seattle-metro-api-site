@@ -21,7 +21,8 @@
     </form>
     <p v-show="showRegisterButton" :id="RESEND_VERIFICATION_TAG">Failed confirmation? <a :id="RESEND_VERIFICATION_BUTTON" href="#">Resend code</a></p>
     <div :id="UNDER_CONSTRUCTION_COMPONENT" v-if="showUnderConstructionComponent">
-      <UnderConstructionComponent></UnderConstructionComponent>
+      <UnderConstructionComponent :username="username" :cognitoUser="cognitoUser" :cognitoResult="cognitoResult" :cachedCognitoSession="cachedCognitoSession">
+      </UnderConstructionComponent>
     </div>
   </div>
 </template>
@@ -35,17 +36,29 @@ import UnderConstructionComponent from '@/components/UnderConstructionComponent'
 import * as CognitoIdentityServiceProvider from 'amazon-cognito-identity-js';
 import Cookies from 'js-cookie';
 import config from '../../config/config';
+import {
+  CognitoAccessToken,
+  CognitoIdToken,
+  CognitoRefreshToken,
+  CognitoUserSession
+} from 'amazon-cognito-identity-js';
 
 export default {
   name: 'SignInComponent',
-  components: { UnderConstructionComponent, ForgotPasswordComponent, RegisterComponent, ResendVerificationComponent },
+  components: {
+    UnderConstructionComponent,
+    ForgotPasswordComponent,
+    RegisterComponent,
+    ResendVerificationComponent
+  },
   data() {
     return {
       username: null,
       password: null,
       authenticationData: null,
       cognitoUser: null,
-      accessToken: null,
+      cachedCognitoSession: null,
+      cognitoResult: null,
       showSignInForm: true,
       showRegistrationForm: false,
       showRegisterButton: true,
@@ -58,6 +71,7 @@ export default {
       basicRegisteredCookie: null,
       basicVerifiedCookieSet: null,
       basicVerifiedCookie: null,
+      localStorage: window.localStorage,
 
       SIGN_IN_COMPONENT: 'sign-in',
       FORGOT_PASSWORD_BUTTON: 'forgot-password-button',
@@ -114,6 +128,44 @@ export default {
     if (this.basicVerifiedCookie !== null) {
       this.basicVerifiedCookieSet = true;
     }
+
+    // pull session data and render view based on active session
+    const keyPrefix1 = `CognitoIdentityServiceProvider.${config.cognito.clientId}`;
+    const lastUserKey = `${keyPrefix1}.LastAuthUser`;
+    const username = this.localStorage.getItem(lastUserKey);
+    const keyPrefix2 = `${keyPrefix1}.${username}`;
+
+    const idTokenKey = `${keyPrefix2}.idToken`;
+    const accessTokenKey = `${keyPrefix2}.accessToken`;
+    const refreshTokenKey = `${keyPrefix2}.refreshToken`;
+    const clockDriftKey = `${keyPrefix2}.clockDrift`;
+
+    if (this.localStorage.getItem(idTokenKey)) {
+      const idToken = new CognitoIdToken({
+        IdToken: this.localStorage.getItem(idTokenKey),
+      });
+      const accessToken = new CognitoAccessToken({
+        AccessToken: this.localStorage.getItem(accessTokenKey),
+      });
+      const refreshToken = new CognitoRefreshToken({
+        RefreshToken: this.localStorage.getItem(refreshTokenKey),
+      });
+      const clockDrift = parseInt(this.localStorage.getItem(clockDriftKey), 0) || 0;
+
+      const sessionData = {
+        IdToken: idToken,
+        AccessToken: accessToken,
+        RefreshToken: refreshToken,
+        ClockDrift: clockDrift,
+      };
+      const cachedSession = new CognitoUserSession(sessionData);
+      if (cachedSession.isValid()) {
+        this.cachedCognitoSession = cachedSession;
+        this.loadUnderConstructionComponent();
+      } else {
+        console.log('invalid session: must authenticate');
+      }
+    }
   },
 
   methods: {
@@ -132,7 +184,8 @@ export default {
         const authenticationDetails = new CognitoIdentityServiceProvider
           .AuthenticationDetails(this.authenticationData);
 
-        await this.authenticateUser(authenticationDetails);
+        this.cognitoResult = await this.authenticateUser(authenticationDetails);
+        this.removeSignInInputValues();
         await this.$helpers.sleep(2000);
         if (document.getElementById('authorized-tag').innerHTML === '*Authorized*') {
           // remove any sign-in elements and show under-construction component
@@ -178,25 +231,27 @@ export default {
      */
     async authenticateUser(authenticationData) {
       if (authenticationData !== null) {
-        this.cognitoUser.authenticateUser(authenticationData, {
+        return new Promise((resolve, reject) => {
+          this.cognitoUser.authenticateUser(authenticationData, {
 
-          onSuccess(result) {
-            console.log(`access token=${result.getAccessToken().getJwtToken()}`);
-            this.accessToken = result.getAccessToken().getJwtToken();
-            if (document.getElementById('authorized-tag').innerHTML !== null) {
-              document.getElementById('authorized-tag').innerHTML = '*Authorized*';
-            }
-            if (document.getElementById('unauthorized-reason').innerHTML !== null) {
-              document.getElementById('unauthorized-reason').innerHTML = '';
-            }
-          },
-          onFailure(error) {
-            console.log(`Error authenticating user: ${this.username} with ${error}`);
-            document.getElementById('authorized-tag').innerHTML = '*Not Authorized*';
-            document.getElementById('unauthorized-reason').innerHTML = error.message;
-          },
-        });
-        this.removeSignInInputValues();
+            onSuccess: (result) => {
+              // console.log(`access token=${result.getAccessToken().getJwtToken()}`);
+              // console.log(`accessID=${JSON.stringify(result.getIdToken())}`)
+              if (document.getElementById('authorized-tag').innerHTML !== null) {
+                document.getElementById('authorized-tag').innerHTML = '*Authorized*';
+              }
+              if (document.getElementById('unauthorized-reason').innerHTML !== null) {
+                document.getElementById('unauthorized-reason').innerHTML = '';
+              }
+              resolve(result);
+            },
+            onFailure: (error) => {
+              console.log(`Error authenticating user: ${this.username} with ${error}`);
+              document.getElementById('authorized-tag').innerHTML = '*Not Authorized*';
+              document.getElementById('unauthorized-reason').innerHTML = error.message;
+            },
+          });
+        })
       }
     },
 
@@ -254,7 +309,9 @@ export default {
       this.removeInputBorderStyle();
       this.removeSignInFeatures();
       // remove form box and shadow
-      document.getElementById('sign-in').style.all = 'unset';
+      if (document.getElementById('sign-in') !== null) {
+        document.getElementById('sign-in').style.all = 'unset';
+      }
       this.showUnderConstructionComponent = true;
     },
 
@@ -291,8 +348,10 @@ export default {
      * Clears unauthorized-reason element of any text content.
      */
     toggleUnAuthorizedReasonOff() {
-      if (document.getElementById(this.UNAUTHORIZED_REASON).innerHTML !== null) {
-        document.getElementById(this.UNAUTHORIZED_REASON).innerHTML = '';
+      if (document.getElementById(this.UNAUTHORIZED_REASON) !== null) {
+        if (document.getElementById(this.UNAUTHORIZED_REASON).innerHTML !== null) {
+          document.getElementById(this.UNAUTHORIZED_REASON).innerHTML = '';
+        }
       }
     },
 
@@ -300,16 +359,20 @@ export default {
      * Removes form input values border styling.
      */
     removeInputBorderStyle() {
-      document.getElementById(this.SIGN_IN_USERNAME).style.borderColor = config.COLOR.BLACK;
-      document.getElementById(this.SIGN_IN_PASSWORD).style.borderColor = config.COLOR.BLACK;
+      if (document.getElementById(this.SIGN_IN_USERNAME) !== null && document.getElementById(this.SIGN_IN_PASSWORD) !== null) {
+        document.getElementById(this.SIGN_IN_USERNAME).style.borderColor = config.COLOR.BLACK;
+        document.getElementById(this.SIGN_IN_PASSWORD).style.borderColor = config.COLOR.BLACK;
+      }
     },
 
     /**
      * Clears authorized-tag element of any text content.
      */
     toggleAuthorizedTagOff() {
-      if (document.getElementById(this.AUTHORIZED_TAG).innerHTML !== null) {
-        document.getElementById(this.AUTHORIZED_TAG).innerHTML = '';
+      if (document.getElementById(this.AUTHORIZED_TAG) !== null) {
+        if (document.getElementById(this.AUTHORIZED_TAG).innerHTML !== null) {
+          document.getElementById(this.AUTHORIZED_TAG).innerHTML = '';
+        }
       }
     },
 
