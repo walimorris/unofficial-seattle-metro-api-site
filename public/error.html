@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <link rel="icon" href="<%= BASE_URL %>bus-favicon.ico">
+    <title>Oops</title>
+</head>
+<body>
+<div style="display: flex;margin: auto;height: auto;flex-direction: column;justify-content: center;align-items: center;">
+    <h1>404</h1>
+    <h2>Page Not Found</h2>
+    <p>Sorry, the page you requested doesn't exist or some other error occurred</p>
+    <p><a id="go-back-tag" href="#">Go Back</a> or chill here until something cool happens</p>
+</div>
+<script>
+  document.getElementById('go-back-tag').addEventListener('click', () => {
+    history.back();
+  });
+</script>
+</body>
+</html>
