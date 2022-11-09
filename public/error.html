@@ -6,11 +6,6 @@
     <meta name="viewport" content="width=device-width,initial-scale=1.0">
     <link rel="icon" href="<%= BASE_URL %>bus-favicon.ico">
     <title>Oops</title>
-    <script>
-        document.getElementById('go-back-tag').addEventListener('click', () => {
-          window.location.reload();
-        });
-    </script>
 </head>
 <body>
 <div style="display: flex;margin: auto;height: auto;flex-direction: column;justify-content: center;align-items: center;">
@@ -19,5 +14,10 @@
     <p>Sorry, the page you requested doesn't exist or some other error occurred</p>
     <p><a id="go-back-tag" href="#">Go Back</a> or chill here until something cool happens</p>
 </div>
+<script>
+  document.getElementById('go-back-tag').addEventListener('click', () => {
+    history.back();
+  });
+</script>
 </body>
 </html>
