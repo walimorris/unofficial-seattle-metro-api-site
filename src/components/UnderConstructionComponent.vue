@@ -2,7 +2,7 @@
   <div :id="UNDER_CONSTRUCTION_COMPONENT">
     <div :id="UNDER_CONSTRUCTION_ITEMS">
       <h1 :id="UNDER_CONSTRUCTION_HEADER">UNDER CONSTRUCTION</h1>
-      <img :id="UNDER_CONSTRUCTION_IMAGE" alt="under construction image" src="/60028.jpg">
+      <img :id="UNDER_CONSTRUCTION_IMAGE" alt="under construction image" src=".././assets/60028.jpg">
       <p><em>Our api website is under construction, but there's a special surprise for early users!</em></p>
     </div>
   </div>
