@@ -34,14 +34,14 @@ import ResendVerificationComponent from '@/components/ResendVerificationComponen
 import ForgotPasswordComponent from '@/components/ForgotPasswordComponent';
 import UnderConstructionComponent from '@/components/UnderConstructionComponent';
 import * as CognitoIdentityServiceProvider from 'amazon-cognito-identity-js';
-import Cookies from 'js-cookie';
-import config from '../../config/config';
 import {
   CognitoAccessToken,
   CognitoIdToken,
   CognitoRefreshToken,
   CognitoUserSession
 } from 'amazon-cognito-identity-js';
+import Cookies from 'js-cookie';
+import config from '../../config/config';
 
 export default {
   name: 'SignInComponent',
@@ -57,6 +57,7 @@ export default {
       password: null,
       authenticationData: null,
       cognitoUser: null,
+      sessionData: null,
       cachedCognitoSession: null,
       cognitoResult: null,
       showSignInForm: true,
@@ -129,36 +130,10 @@ export default {
       this.basicVerifiedCookieSet = true;
     }
 
-    // pull session data and render view based on active session
-    const keyPrefix1 = `CognitoIdentityServiceProvider.${config.cognito.clientId}`;
-    const lastUserKey = `${keyPrefix1}.LastAuthUser`;
-    const username = this.localStorage.getItem(lastUserKey);
-    const keyPrefix2 = `${keyPrefix1}.${username}`;
+    this.sessionData = this.getSessionData();
 
-    const idTokenKey = `${keyPrefix2}.idToken`;
-    const accessTokenKey = `${keyPrefix2}.accessToken`;
-    const refreshTokenKey = `${keyPrefix2}.refreshToken`;
-    const clockDriftKey = `${keyPrefix2}.clockDrift`;
-
-    if (this.localStorage.getItem(idTokenKey)) {
-      const idToken = new CognitoIdToken({
-        IdToken: this.localStorage.getItem(idTokenKey),
-      });
-      const accessToken = new CognitoAccessToken({
-        AccessToken: this.localStorage.getItem(accessTokenKey),
-      });
-      const refreshToken = new CognitoRefreshToken({
-        RefreshToken: this.localStorage.getItem(refreshTokenKey),
-      });
-      const clockDrift = parseInt(this.localStorage.getItem(clockDriftKey), 0) || 0;
-
-      const sessionData = {
-        IdToken: idToken,
-        AccessToken: accessToken,
-        RefreshToken: refreshToken,
-        ClockDrift: clockDrift,
-      };
-      const cachedSession = new CognitoUserSession(sessionData);
+    if (this.sessionData !== null) {
+      const cachedSession = new CognitoUserSession(this.sessionData);
       if (cachedSession.isValid()) {
         this.cachedCognitoSession = cachedSession;
         this.loadUnderConstructionComponent();
@@ -253,6 +228,50 @@ export default {
           });
         })
       }
+    },
+
+    /**
+     * Builds an object that holds user session data as parsed from local storage or null otherwise.
+     *
+     * @return {null| {
+     * IdToken: module:amazon-cognito-identity-js.CognitoIdToken,
+     * RefreshToken: module:amazon-cognito-identity-js.CognitoRefreshToken,
+     * AccessToken: module:amazon-cognito-identity-js.CognitoAccessToken,
+     * ClockDrift: (number|number)
+     * }}
+     */
+    getSessionData() {
+      // pull session data and render view based on active session
+      const keyPrefix1 = `CognitoIdentityServiceProvider.${config.cognito.clientId}`;
+      const lastUserKey = `${keyPrefix1}.LastAuthUser`;
+      const username = this.localStorage.getItem(lastUserKey);
+      const keyPrefix2 = `${keyPrefix1}.${username}`;
+
+      const idTokenKey = `${keyPrefix2}.idToken`;
+      const accessTokenKey = `${keyPrefix2}.accessToken`;
+      const refreshTokenKey = `${keyPrefix2}.refreshToken`;
+      const clockDriftKey = `${keyPrefix2}.clockDrift`;
+
+      if (this.localStorage.getItem(idTokenKey)) {
+        const idToken = new CognitoIdToken({
+          IdToken: this.localStorage.getItem(idTokenKey),
+        });
+        const accessToken = new CognitoAccessToken({
+          AccessToken: this.localStorage.getItem(accessTokenKey),
+        });
+        const refreshToken = new CognitoRefreshToken({
+          RefreshToken: this.localStorage.getItem(refreshTokenKey),
+        });
+        const clockDrift = parseInt(this.localStorage.getItem(clockDriftKey), 0) || 0;
+
+        return {
+          IdToken: idToken,
+          AccessToken: accessToken,
+          RefreshToken: refreshToken,
+          ClockDrift: clockDrift,
+        };
+      }
+      return null;
     },
 
     /**
