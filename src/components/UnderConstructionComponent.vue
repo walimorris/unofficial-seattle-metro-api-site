@@ -3,7 +3,7 @@
     <div :id="UNDER_CONSTRUCTION_ITEMS">
       <h1 :id="UNDER_CONSTRUCTION_HEADER">UNDER CONSTRUCTION</h1>
       <img :id="UNDER_CONSTRUCTION_IMAGE" alt="under construction image" src=".././assets/60028.jpg">
-      <p><em>Our api website is under construction, but there's a special surprise for early users!</em></p>
+      <p><em>Hi, {{ this.userPersonalName }}! Our api website is under construction, but there's a special surprise for early users!</em></p>
       <button :id="LOGOUT_BUTTON" v-on:click="logoutOfCurrentSession()">Logout</button>
     </div>
   </div>
@@ -28,6 +28,7 @@ export default {
       refreshToken: null,
       clockDrift: null,
       userEmail: null,
+      userPersonalName: null,
       currentCognitoUserName: null,
       currentCognitoUser: null,
 
@@ -43,9 +44,13 @@ export default {
     if (this.cachedCognitoSession !== null) {
       document.getElementById('sign-in').style.all = 'unset';
     }
+    // uses cached session data for cognito user attributes
     if (this.cognitoUser === null) {
       this.initializeUserDataFromCachedSession();
       this.buildCurrentCognitoUser();
+      // uses cognito authentication result for user attributes based from sign-in
+    } else {
+      this.userPersonalName = this.getUserPersonalName(this.cognitoResult);
     }
   },
 
@@ -72,6 +77,7 @@ export default {
 
     buildCurrentCognitoUser() {
       this.userEmail = this.idToken.payload.email;
+      this.userPersonalName = this.idToken.payload.name;
       this.currentCognitoUser = this.$helpers.buildCognitoUser(this.userEmail);
       this.currentCognitoUserName = this.currentCognitoUser.Username;
     },
@@ -81,8 +87,12 @@ export default {
       this.accessToken = this.cachedCognitoSession.accessToken;
       this.refreshToken = this.cachedCognitoSession.refreshToken;
       this.clockDrift = this.cachedCognitoSession.clockDrift;
-    }
-  },
+    },
+
+    getUserPersonalName(result) {
+      return result.idToken.payload.name;
+    },
+  }
 }
 
 </script>
