@@ -1,4 +1,4 @@
-## Unofficial Seattle Metro api SPA Site
+## Unofficial Seattle Metro api web application
 [The unofficial seattle metro api](https://github.com/walimorris/unofficial-seattle-metro-api) is an application programming interface designed to gain Seattle 
 metro schedule insights on the go, utilizing serverless technologies for intelligent text extraction with Natural Language Processing services such as: 
 * [AWS Textract](https://aws.amazon.com/textract/)
