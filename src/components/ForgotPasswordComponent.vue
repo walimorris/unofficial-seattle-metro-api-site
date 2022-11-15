@@ -5,7 +5,7 @@
       <UpdatePasswordComponent></UpdatePasswordComponent>
     </div>
     <form v-show="showForgotPasswordForm" :id="FORGOT_PASSWORD_FORM">
-      <input class="form-control" type="email" id="forgot-password-username" placeholder="username">
+      <input class="form-control" type="email" :id="FORGOT_PASSWORD_USERNAME" placeholder="username">
       <h3 :id="FORGOT_PASSWORD_MESSAGE"></h3>
       <button type="button"
               :id="FORGOT_PASSWORD_EXECUTION_BUTTON"
@@ -77,10 +77,12 @@ export default {
             this.showUpdatePasswordForm = true;
           }
         } else {
-          this.renderErrorMessage(config.FORM_ERROR_MESSAGES.INVALID_USERNAME)
+          this.renderErrorMessage(config.FORM_ERROR_MESSAGES.INVALID_USERNAME);
+          this.renderRedHighlightOnInput();
         }
       } else {
-        this.renderErrorMessage(config.FORM_ERROR_MESSAGES.EMPTY_USERNAME)
+        this.renderErrorMessage(config.FORM_ERROR_MESSAGES.EMPTY_USERNAME);
+        this.renderRedHighlightOnInput();
       }
     },
 
@@ -157,6 +159,14 @@ export default {
       document.getElementById(this.FORGOT_PASSWORD_MESSAGE).innerHTML = message;
       document.getElementById(this.FORGOT_PASSWORD_MESSAGE).style.color = config.COLOR.LIGHT_RED;
       document.getElementById(this.FORGOT_PASSWORD_MESSAGE).style.fontSize = config.FONT_SIZE.SMALL;
+    },
+
+    renderRedHighlightOnInput() {
+      document.getElementById(this.FORGOT_PASSWORD_USERNAME).style.borderColor = config.COLOR.LIGHT_RED;
+    },
+
+    renderBlackHighlightOnInput() {
+      document.getElementById(this.FORGOT_PASSWORD_USERNAME).style.borderColor = config.COLOR.BLACK;
     }
   }
 };
